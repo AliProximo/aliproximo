@@ -1,0 +1,30 @@
+name: Notifier
+
+on:
+  issues:
+    types: [opened, closed]
+
+jobs:
+  notifyTelegram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send open issue message
+        if: github.event.issue.state == 'open'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Salve devs, nova Issue!
+            Link da Issue:
+            https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number}}
+      - name: send closed issue message
+        if: github.event.issue.state != 'open'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Issue resolvida! Mandaram bem demais devs \o/ 🎉🎉
+            Link da Issue Resolvida:
+            https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number}}

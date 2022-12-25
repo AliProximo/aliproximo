@@ -1,0 +1,46 @@
+name: Danger JS
+
+on:
+  pull_request:
+    types: [opened, reopened, syncronize, edited]
+
+jobs:
+  dangerjs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Checkout base branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: 🏗 Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Record before stats
+        continue-on-error: true
+        run: |
+          mkdir -p .diff/audit-ci
+          pnpm install --frozen-lockfile
+          pnpm --silent dlx audit-ci@\^6 --config ./audit-ci.jsonc -o json > .diff/audit-ci/before.json
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v2
+        with:
+          clean: false
+
+      - name: Record after stats
+        continue-on-error: true
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --silent dlx audit-ci@\^6 --config ./audit-ci.jsonc -o json > .diff/audit-ci/after.json
+
+      - name: 🚨 DangerJS
+        run: pnpm run danger ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

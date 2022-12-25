@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+pnpm dlx audit-ci@^6 --config ./audit-ci.jsonc
