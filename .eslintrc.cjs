@@ -10,6 +10,10 @@ module.exports = {
       "./packages/*/tsconfig.json",
     ],
   },
+  env: {
+    "node": true,
+    "browser": true,
+  },
   plugins: [
     "@typescript-eslint",
     "simple-import-sort",
