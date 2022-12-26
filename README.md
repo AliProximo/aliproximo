@@ -92,6 +92,19 @@ pnpm db:push
 
 - Caso a lista de gitmojis esteja desatualizada, tente usar `scripts/fetch-gitmojis`: script node para buscar a lista de gitmojis de gitmoji.dev no github.
 
+- Falha no carregamento das variáveis de ambiente, tente criar um link simbólico com o arquivo `.env` do diretório raiz
+
+```shell
+> next build
+
+❌ Invalid environment variables
+...
+> ln -s `pwd`/.env apps/nextjs/.env
+> next build
+
+info  - Loaded env from `pwd`/apps/nextjs/.env
+```
+
 ### Variáveis de Ambiente
 
 #### Next.js
