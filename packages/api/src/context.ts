@@ -3,9 +3,8 @@ import { prisma } from "@acme/db";
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
-/**
- * Replace this with an object if you want to pass things to createContextInner
- */
+import { s3Client } from './aws/client'
+
 type CreateContextOptions = {
   session: Session | null;
 };
@@ -19,6 +18,7 @@ export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma,
+    s3Client
   };
 };
 
