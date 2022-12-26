@@ -96,8 +96,12 @@ pnpm db:push
 
 #### Next.js
 
+- `DATABASE_URL`: url para conectar ao banco de dados com Prisma.
+- `NEXTAUTH_URL`: url para o site, next-auth utiliza `VERCEL_URL` caso a primeira alternativa seja nula.
+- `NEXTAUTH_SECRET`: Sugerido utilizar [@sandrinodimattia/generate-secret](https://github.com/sandrinodimattia/generate-secret) para gerar um valor aleatório. Leia mais na documentação do [NextAuth](https://next-auth.js.org/configuration/options#secret).
 - `GOOGLE_CLIENT_{ID,SECRET}`: Informações do cliente OAuth 2.0, recuperadas através do site <https://console.developers.google.com/apis/credentials>.
-- `NEXTAUTH_SECRET`: Sugerido utilizar [@sandrinodimattia/generate-secret](https://github.com/sandrinodimattia/generate-secret) para gerar um valor aleatório. Leia mais na documentação do [NextAuth](https://next-auth.js.org/configuration/options#secret)
+- `ADMIN_EMAIL`: email do usuário padrão do sistema.
+- `S3_{REGION,ACCESS_KEY_ID,SECRET_ACCESS_KEY,BUCKET_NAME}`: configurações para instanciação do cliente AWS IAM e S3. Leia mais na documentação oficial da AWS e no [post](https://betterprogramming.pub/how-to-upload-files-to-amazon-s3-from-nextjs-app-b7ef1909976b).
 
 ## Licença
 
@@ -105,7 +109,7 @@ Esse projeto foi licenciado pela Apache License 2.0 - ver [LICENSE](LICENSE) par
 
 ## Ambiente de Produção
 
-- ProtonMail e-mail host
+- ProtonMail e-mail
 - MySql DB PlanetScale
 - AWS S3 Bucket
 - Vercel Team Deploy
