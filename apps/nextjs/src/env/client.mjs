@@ -15,6 +15,7 @@ export const formatErrors = (
     .filter(Boolean);
 
 if (!_clientEnv.success) {
+  // eslint-disable-next-line no-console
   console.error(
     "❌ Invalid environment variables:\n",
     ...formatErrors(_clientEnv.error.format()),
@@ -24,6 +25,7 @@ if (!_clientEnv.success) {
 
 for (let key of Object.keys(_clientEnv.data)) {
   if (!key.startsWith("NEXT_PUBLIC_")) {
+    // eslint-disable-next-line no-console
     console.warn("❌ Invalid public environment variable name:", key);
 
     throw new Error("Invalid public environment variable name");
