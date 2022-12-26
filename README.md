@@ -105,6 +105,8 @@ pnpm db:push
 info  - Loaded env from `pwd`/apps/nextjs/.env
 ```
 
+- Se o IntelliSense do VSCode ficar em loop infinito ao carregar, 2 possíveis responsáveis: checar se a versão do typescript usada pelo VSCode é a mesma do workspace e se o computador estiver em economia de bateria.
+
 ### Variáveis de Ambiente
 
 #### Next.js
