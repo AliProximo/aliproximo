@@ -39,8 +39,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
-        run: pnpm install audit-ci@6.4.1
-
       - name: 🚨 Check for vulnerabilities
-        run: pnpm audit-ci --config ./audit-ci.jsonc
+        run: pnpm --package=audit-ci@6.4.1 dlx audit-ci --config ./audit-ci.jsonc
