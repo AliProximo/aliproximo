@@ -14,5 +14,8 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v3
 
+      - name: 🏗 Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+
       - name: 🚨 Check for vulnerabilities
         run: pnpm --silent dlx audit-ci@^6 --config ./audit-ci.jsonc

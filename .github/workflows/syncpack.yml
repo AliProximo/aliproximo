@@ -23,13 +23,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          bot-email: 'github-actions@github.com'
-          bot-username: 'github-actions[bot]'
-          commit-message: '🚨 (syncpack): format and sync package.json files'
-          format-mismatches: 'fix'
-          lockfile-mismatches: 'fix'
-          package-manager-version: 'latest'
-          package-manager: 'npm'
-          semver-range-mismatches: 'fix'
-          syncpack-version: '7.2.1'
-          version-mismatches: 'fix'
+          bot-email: "github-actions@github.com"
+          bot-username: "github-actions[bot]"
+          commit-message: "🚨 (syncpack): format and sync package.json files"
+          format-mismatches: "fix"
+          lockfile-mismatches: "fix"
+          package-manager-version: "7.13.0"
+          package-manager: "pnpm"
+          semver-range-mismatches: "fix"
+          syncpack-version: "8.3.9"
+          version-mismatches: "fix"
