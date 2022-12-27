@@ -64,7 +64,7 @@ model Store {
   @@index([ownerEmail])
 }
 
-enum Size {
+enum SizeOptions {
   S
   M
   L
@@ -73,9 +73,14 @@ enum Size {
   XXXL
 }
 
+model Size {
+  name    SizeOptions @id @unique
+  clothes Clothing[]
+}
+
 model Clothing {
   id        String  @id @default(cuid())
-  sizes     String
+  sizes     Size[]
   product   Product @relation(fields: [productId], references: [id])
   productId String  @unique
   store     Store   @relation(fields: [storeId], references: [id])
@@ -109,6 +114,7 @@ model Product {
 
 enum Role {
   Admin
+  Manager
   Editor
   Moderator
   User
@@ -153,6 +159,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  active        Boolean   @default(true)
   accounts      Account[]
   sessions      Session[]
   role          Role      @default(User)
