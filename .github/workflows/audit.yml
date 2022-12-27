@@ -17,5 +17,11 @@ jobs:
       - name: 🏗 Setup pnpm
         uses: pnpm/action-setup@v2.2.4
 
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
       - name: 🚨 Check for vulnerabilities
         run: pnpm --silent dlx audit-ci@^6 --config ./audit-ci.jsonc
