@@ -45,23 +45,29 @@ model Photo {
   products Product[]
 }
 
+// TODO: review relations to use more referential actions, instead of code
+// https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions
 model Store {
   id             String     @id @default(cuid())
   name           String
   registerNumber String // NOTE: CNPJ ou CPF
   whatsapp       String
+  verified       Boolean    @default(false)
   logo           Photo      @relation(fields: [logoId], references: [id])
   logoId         String
   address        Address    @relation(fields: [postalCode], references: [postalCode])
   postalCode     String
   owner          StoreOwner @relation(fields: [ownerEmail], references: [email])
   ownerEmail     String
-  users          User[]
+  users          User[]     @relation("organization")
+  creator        User       @relation("creator", fields: [creatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creatorId      String
   clothings      Clothing[]
 
   @@index([logoId])
   @@index([postalCode])
   @@index([ownerEmail])
+  @@index([creatorId])
 }
 
 enum SizeOptions {
@@ -98,20 +104,22 @@ model Category {
 model Product {
   id          String    @id @default(cuid())
   name        String
-  quantity    Int
+  quantity    Int       @default(0)
   description String?
   price       Decimal?
   available   Boolean   @default(false)
-  photo       Photo     @relation(fields: [photoId], references: [id])
-  photoId     String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  categoryId  String
+  photo       Photo?    @relation(fields: [photoId], references: [id])
+  photoId     String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId  String?
   clothing    Clothing?
 
   @@index([photoId])
   @@index([categoryId])
 }
 
+// NOTE: order is relevant
+// order represents current role hierarchy
 enum Role {
   Admin
   Manager
@@ -163,8 +171,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   role          Role      @default(User)
-  store         Store?    @relation(fields: [storeId], references: [id])
+  store         Store?    @relation("organization", fields: [storeId], references: [id])
   storeId       String?
+  createdStores Store[]   @relation("creator")
 
   @@index([storeId])
 }
