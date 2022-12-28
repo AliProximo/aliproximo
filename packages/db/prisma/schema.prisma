@@ -25,7 +25,25 @@ model Address {
   street       String
   country      String  @default("Brasil")
   address      String // NOTE: Complemento
-  longitude    String
+  // NOTE: MySQL Spatial Docs
+  // ----- Schema
+  // https://dev.mysql.com/doc/refman/8.0/en/gis-class-point.html
+  // https://dev.mysql.com/doc/refman/8.0/en/creating-spatial-columns.html
+  // e.g CREATE TABLE geom (pt POINT);
+  // https://dev.mysql.com/doc/refman/8.0/en/populating-spatial-columns.html
+  // e.g INSERT INTO geom VALUES (ST_GeomFromText('POINT(1 1)'));
+  // https://dev.mysql.com/doc/refman/8.0/en/fetching-spatial-data.html
+  // e.g SELECT ST_AsText(g) FROM geom;
+  // https://dev.mysql.com/doc/refman/8.0/en/creating-spatial-indexes.html
+  // e.g CREATE TABLE geom (g GEOMETRY NOT NULL SRID 4326, SPATIAL INDEX(g));
+  // ----- Sort
+  // pure math distance between points
+  // https://stackoverflow.com/questions/808963/finding-cities-within-x-kilometers-or-miles
+  // DISTANCE BETWEEN GEOMETRIES -> ST_DISTANCE
+  // https://dev.mysql.com/doc/refman/8.0/en/spatial-relation-functions-object-shapes.html#function_st-distance
+  // ----- Query
+  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#unsupported-types
+  longitude    String // MySQL uses double-precision (8-byte) to represent coordinates
   latitude     String
   stores       Store[]
 }

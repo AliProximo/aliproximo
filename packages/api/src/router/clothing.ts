@@ -392,6 +392,8 @@ export const clothingRouter = router({
 
       // TODO: review relations to use more referential actions, instead of code
       // https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions
+      // TODO: use prisma transaction, if needed, instead of 3 separated promises
+      // https://www.prisma.io/docs/concepts/components/prisma-client/transactions#sequential-prisma-client-operations
       return getDeletePromise({
         key: clothing.product.photo?.name,
       }).then(() =>
