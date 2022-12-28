@@ -4,6 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 
 import { Header } from "../../../components";
+import { useModal } from "../../../utils";
 
 // import type { AppRouter } from "@aliproximo/api";
 // import type { inferProcedureOutput } from "@trpc/server";
@@ -23,7 +24,7 @@ import { Header } from "../../../components";
 const Home: NextPage = () => {
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
-  const [openModal, setModalState] = useState(false);
+  const { Modal, open: openModal } = useModal();
 
   return (
     <div className="flex h-screen flex-col">
@@ -43,7 +44,7 @@ const Home: NextPage = () => {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            setModalState(true);
+            openModal();
           }}
           className="flex w-full flex-col"
         >
@@ -302,54 +303,23 @@ const Home: NextPage = () => {
           </div>
         </form>
       </main>
-
-      {/** TODO: create hook useModal
-       * const {Modal, open, close} = useModal()
-       * ...
-       * <Modal>{children}</Modal>
-       */}
-      <input
-        type="checkbox"
-        id="my-modal-4"
-        checked={openModal}
-        className="modal-toggle"
-        onChange={() => {
-          setModalState(false);
-        }}
-      />
-      <label
-        htmlFor="my-modal-4"
-        className={`modal cursor-pointer ${openModal ? "modal-open" : ""}`}
-      >
-        <label className="modal-box relative" htmlFor="">
-          <label
-            htmlFor="my-modal-4"
-            className="btn btn-sm btn-circle absolute right-2 top-2"
-          >
-            ✕
-          </label>
-          <div className="flex w-full flex-col items-center pt-12 pb-12">
-            <Image
-              src={"/logo.png"}
-              width={128}
-              height={128}
-              alt={"Logo da Ali Próximo"}
-            />
-            <h1 className="pt-12 pb-12 text-3xl font-bold">
-              Informações enviadas
-            </h1>
-            <span className="text-center text-xl">
-              Seu cadastro será analisado e, se estiver tudo certo, uma resposta
-              vai ser enviada para o seu e-mail cadastrado
-            </span>
-          </div>
-          <div className="modal-action">
-            <label htmlFor="my-modal-4" className="btn">
-              Fechar
-            </label>
-          </div>
-        </label>
-      </label>
+      <Modal>
+        <div className="flex w-full flex-col items-center pt-12 pb-12">
+          <Image
+            src={"/logo.png"}
+            width={128}
+            height={128}
+            alt={"Logo da Ali Próximo"}
+          />
+          <h1 className="pt-12 pb-12 text-3xl font-bold">
+            Informações enviadas
+          </h1>
+          <span className="text-center text-xl">
+            Seu cadastro será analisado e, se estiver tudo certo, uma resposta
+            vai ser enviada para o seu e-mail cadastrado
+          </span>
+        </div>
+      </Modal>
     </div>
   );
 };
