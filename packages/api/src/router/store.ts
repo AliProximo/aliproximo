@@ -11,36 +11,12 @@ import {
   publicProcedure,
   router,
 } from "../trpc";
+import { storeInputValidators } from "../validators/input/store";
 
 const storeProcedure = createRbacProcedure({
   requiredRoles: ["Admin", "Moderator"],
 });
 const adminProcedure = createRbacProcedure({ requiredRoles: ["Admin"] });
-
-export const storeInputValidators = {
-  'create': z.object({
-    name: z.string(),
-    registerNumber: z.string(),
-    whatsapp: z.string(),
-    address: z.object({
-      address: z.string(),
-      city: z.string(),
-      latitude: z.string(),
-      longitude: z.string(),
-      neighborhood: z.string(),
-      postalCode: z.string(),
-      state: z.string(),
-      street: z.string(),
-      country: z.string().optional(),
-    }),
-    logoFilename: z.string(),
-    owner: z.object({
-      name: z.string(),
-      email: z.string().email(),
-      phone: z.string(),
-    }),
-  }),
-}
 
 export const storeRouter = router({
   all: publicProcedure.query(({ ctx }) => {
