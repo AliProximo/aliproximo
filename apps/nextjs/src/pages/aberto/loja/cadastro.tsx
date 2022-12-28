@@ -303,6 +303,11 @@ const Home: NextPage = () => {
         </form>
       </main>
 
+      {/** TODO: create hook useModal
+       * const {Modal, open, close} = useModal()
+       * ...
+       * <Modal>{children}</Modal>
+       */}
       <input
         type="checkbox"
         id="my-modal-4"
