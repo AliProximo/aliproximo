@@ -1,5 +1,5 @@
 {
-  "name": "create-t3-turbo",
+  "name": "aliproximo",
   "private": true,
   "dependencies": {
     "@commitlint/config-conventional": "17.2.0",

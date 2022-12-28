@@ -1,5 +1,5 @@
-import { type Session, getServerSession } from "@acme/auth";
-import { prisma } from "@acme/db";
+import { type Session, getServerSession } from "@aliproximo/auth";
+import { prisma } from "@aliproximo/db";
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 

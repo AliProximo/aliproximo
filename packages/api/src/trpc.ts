@@ -1,4 +1,4 @@
-import type { Role } from "@acme/db";
+import type { Role } from "@aliproximo/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 

@@ -1,10 +1,10 @@
 {
-  "name": "@acme/api",
+  "name": "@aliproximo/api",
   "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
-    "@acme/auth": "0.1.0",
-    "@acme/db": "0.1.0",
+    "@aliproximo/auth": "0.1.0",
+    "@aliproximo/db": "0.1.0",
     "@aws-sdk/client-s3": "3.231.0",
     "@aws-sdk/s3-request-presigner": "3.231.0",
     "@trpc/client": "10.5.0",

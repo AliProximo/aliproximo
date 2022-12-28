@@ -3,7 +3,7 @@
  * Original code from Shubham Verma
  * SOURCE: https://blogs.shubhamverma.me/implement-protected-routes-in-nextjs
  */
-import type { Role } from "@acme/db";
+import type { Role } from "@aliproximo/db";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";

@@ -1,4 +1,4 @@
-import { Prisma, SizeOptions } from "@acme/db";
+import { Prisma, SizeOptions } from "@aliproximo/db";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { TRPCError } from "@trpc/server";
 import isDecimal from "validator/lib/isDecimal";

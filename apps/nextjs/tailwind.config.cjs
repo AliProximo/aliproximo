@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import("tailwindcss").Config} */
 module.exports = {
-  presets: [require("@acme/tailwind-config")],
+  presets: [require("@aliproximo/tailwind-config")],
   plugins: [require('daisyui')],
   daisyui: {
     themes: [{

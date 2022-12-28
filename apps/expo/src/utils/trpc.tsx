@@ -1,6 +1,6 @@
 import React from "react";
-import type { AppRouter } from "@acme/api";
-import { transformer } from "@acme/api/transformer";
+import type { AppRouter } from "@aliproximo/api";
+import { transformer } from "@aliproximo/api/transformer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";

@@ -5,7 +5,7 @@ import Image from "next/image";
 
 import { Header } from "../../../components";
 
-// import type { AppRouter } from "@acme/api";
+// import type { AppRouter } from "@aliproximo/api";
 // import type { inferProcedureOutput } from "@trpc/server";
 /* const PostCard: React.FC<{
   post: inferProcedureOutput<AppRouter["post"]["all"]>[number];

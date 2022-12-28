@@ -1,4 +1,4 @@
-import { Role } from "@acme/db";
+import { Role } from "@aliproximo/db";
 import { type DefaultSession,DefaultSession  } from "next-auth";
 
 /**

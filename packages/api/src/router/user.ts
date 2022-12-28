@@ -1,4 +1,4 @@
-import { Role } from '@acme/db'
+import { Role } from '@aliproximo/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
