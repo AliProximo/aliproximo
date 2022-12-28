@@ -1,4 +1,5 @@
-import { DefaultSession } from "next-auth";
+import { Role } from "@acme/db";
+import { type DefaultSession,DefaultSession  } from "next-auth";
 
 /**
  * Module augmentation for `next-auth` types
@@ -11,6 +12,8 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: Role;
+      storeId?: string;
     } & DefaultSession["user"];
   }
 }

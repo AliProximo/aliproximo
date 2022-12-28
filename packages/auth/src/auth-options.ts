@@ -1,24 +1,56 @@
-import { prisma } from "@acme/db";
+import { prisma, Role } from "@acme/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type NextAuthOptions } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google";
+
+import { env } from "./env/server.mjs";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID as string,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
     // ...add more providers here
   ],
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user) {
-        session.user.id = user.id;
+        const userData = await prisma.user.findUnique({
+          where: {
+            id: user.id,
+          },
+        })
+        session.user.id = user.id
+        session.user.role =
+          user.email === env.ADMIN_EMAIL
+            ? Role['Admin']
+            : userData?.role ?? Role['User']
+        session.user.storeId = userData?.storeId ?? undefined
       }
-      return session;
+      return session
+    },
+    async signIn({ user }) {
+      if (user.email === env.ADMIN_EMAIL) return true
+
+      const userData = await prisma.user.findUnique({
+        where: {
+          id: user.id
+        },
+      })
+
+      const isAllowedToSignIn = !userData || userData.active === true
+
+      if (isAllowedToSignIn) {
+        return true
+      } else {
+        // Return false to display a default error message
+        return false
+        // Or you can return a URL to redirect to:
+        // return '/unauthorized'
+      }
     },
   },
 };
