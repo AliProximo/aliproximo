@@ -42,6 +42,14 @@ export const storeRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
+      /* is user default admin? skip validations */
+      if (user.email !== env.ADMIN_EMAIL) {
+        /* does user belong to a store? */
+        if (user.storeId !== undefined) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+      }
+
       const isTrustedSource = (() => {
         if (user.email === env.ADMIN_EMAIL) return true;
         if ((["Admin", "Manager"] as Role[]).includes(user.role)) return true;
@@ -52,6 +60,11 @@ export const storeRouter = router({
       return ctx.prisma.store.create({
         data: {
           ...rest,
+          users: {
+            connect: {
+              id: user.id
+            }
+          },
           logo: {
             create: {
               name: logoFilename,
