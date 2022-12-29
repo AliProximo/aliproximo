@@ -21,7 +21,8 @@ export const withAuth = (WrappedComponent: NextPage, options?: Params) => {
 
     if (
       status === "unauthenticated" ||
-      (allowedRoles &&
+      (status !== "loading" &&
+        allowedRoles &&
         !allowedRoles.includes(sessionData?.user?.role ?? "User"))
     ) {
       Router.replace(replaceUrl ?? "/");
