@@ -1,10 +1,9 @@
 import type { NextPage } from "next";
-import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { signIn, signOut } from "next-auth/react";
 
-import { Header } from "../components";
+import { Head, Header } from "../components";
 import { trpc } from "../utils/trpc";
 
 // import type { AppRouter } from "@aliproximo/api";
@@ -61,14 +60,7 @@ const AuthShowcase: React.FC = () => {
 const Home: NextPage = () => {
   return (
     <>
-      <Head>
-        <title>Ali Próximo</title>
-        <meta
-          name="description"
-          content="Descubra o catálogo das lojas físicas mais perto de você"
-        />
-        <link rel="icon" href="/logo.png" />
-      </Head>
+      <Head />
       <div className="flex h-screen flex-col">
         <Header />
         <main className="flex flex-1 flex-col items-center justify-center bg-white text-black">

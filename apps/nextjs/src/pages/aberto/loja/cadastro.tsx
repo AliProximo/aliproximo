@@ -7,12 +7,11 @@ import { inputValidators } from "@aliproximo/api/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { inferProcedureInput } from "@trpc/server";
 import type { NextPage } from "next";
-import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
-import { Header } from "../../../components";
+import { Head, Header } from "../../../components";
 import { trpc, useAWS, useFeedback, useModal, withAuth } from "../../../utils";
 
 type Inputs = inferProcedureInput<AppRouter["store"]["create"]> & {
@@ -74,14 +73,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="flex h-screen flex-col">
-      <Head>
-        <title>Cadastro Loja - Ali Próximo</title>
-        <meta
-          name="description"
-          content="Descubra o catálogo das lojas físicas mais perto de você"
-        />
-        <link rel="icon" href="/logo.png" />
-      </Head>
+      <Head title={"Cadastro Loja - Ali Próximo"} />
       <Header />
       <main className="container flex flex-1 flex-col xl:pl-32">
         <h1 className="flex w-full justify-center pt-12 pb-12 text-3xl font-bold">
