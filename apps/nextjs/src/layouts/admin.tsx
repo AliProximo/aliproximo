@@ -33,9 +33,11 @@ export const AdminLayout: React.FC<Props> = ({ children }) => {
           <ul className="menu text-base-content flex w-80 justify-center gap-y-4 bg-[#D9D9D9]">
             {sessionData?.user.role === "Admin" ? (
               <li
-                className={`rounded-none bg-[${
-                  router.pathname === "/admin/lojas" ? "#379AC4" : "#AAAAAA"
-                }]`}
+                className={`rounded-none ${
+                  router.pathname === "/admin/lojas"
+                    ? "bg-[#379AC4]"
+                    : "bg-[#AAAAAA]"
+                }`}
               >
                 <Link href={"/admin/lojas"}>
                   <span>Todas as Lojas</span>
@@ -45,18 +47,22 @@ export const AdminLayout: React.FC<Props> = ({ children }) => {
               <></>
             )}
             <li
-              className={`rounded-none bg-[${
-                router.pathname === `/admin/loja` ? "#379AC4" : "#AAAAAA"
-              }]`}
+              className={`rounded-none ${
+                router.pathname === `/admin/loja`
+                  ? "bg-[#379AC4]"
+                  : "bg-[#AAAAAA]"
+              }`}
             >
               <Link href={`/admin/loja`}>
                 <span>Dados da Loja</span>
               </Link>
             </li>
             <li
-              className={`rounded-none bg-[${
-                router.pathname === "/admin/produtos" ? "#379AC4" : "#AAAAAA"
-              }]`}
+              className={`rounded-none ${
+                router.pathname === "/admin/produtos"
+                  ? "bg-[#379AC4]"
+                  : "bg-[#AAAAAA]"
+              }`}
             >
               <Link href={"/admin/produtos"}>
                 <span>Produtos</span>
