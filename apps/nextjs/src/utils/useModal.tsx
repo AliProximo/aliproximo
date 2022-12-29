@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-export function useModal() {
+type Props = { onClose: () => void };
+
+export function useModal({ onClose }: Props = {} as Props) {
   const [openModal, setModalState] = useState(false);
 
   const Modal: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -12,6 +14,7 @@ export function useModal() {
         className="modal-toggle"
         onChange={() => {
           setModalState(false);
+          onClose();
         }}
       />
       <label

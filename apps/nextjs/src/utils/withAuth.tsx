@@ -8,10 +8,11 @@ import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
-export const withAuth = (
-  WrappedComponent: NextPage,
-  { allowedRoles, replaceUrl }: { allowedRoles?: Role[]; replaceUrl?: string },
-) => {
+type Params = { allowedRoles?: Role[]; replaceUrl?: string };
+
+export const withAuth = (WrappedComponent: NextPage, options?: Params) => {
+  const { allowedRoles, replaceUrl } = options ?? ({} as Params);
+
   return function AuthedWrapper() {
     const Router = useRouter();
     const { status, data: sessionData } = useSession();
