@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { HTMLAttributes, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -8,10 +8,13 @@ import { Head, Header } from "../components";
 
 type Props = {
   children?: React.ReactNode;
-  className?: string;
-};
+} & HTMLAttributes<HTMLDivElement>;
 
-export const AdminLayout: React.FC<Props> = ({ children, className }) => {
+export const AdminLayout: React.FC<Props> = ({
+  children,
+  className,
+  ...props
+}) => {
   const [drawerOpen, setDrawer] = useState(false);
   const router = useRouter();
   const { data: sessionData } = useSession();
@@ -28,7 +31,8 @@ export const AdminLayout: React.FC<Props> = ({ children, className }) => {
           onChange={() => setDrawer((old) => !old)}
         />
         <div
-          className={`drawer-content flex flex-col items-center justify-center bg-[#F5F5F5] ${className}`}
+          className={`drawer-content flex bg-[#F5F5F5] ${className}`}
+          {...props}
         >
           {children}
         </div>
