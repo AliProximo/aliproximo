@@ -8,9 +8,10 @@ import { Head, Header } from "../components";
 
 type Props = {
   children?: React.ReactNode;
+  className?: string;
 };
 
-export const AdminLayout: React.FC<Props> = ({ children }) => {
+export const AdminLayout: React.FC<Props> = ({ children, className }) => {
   const [drawerOpen, setDrawer] = useState(false);
   const router = useRouter();
   const { data: sessionData } = useSession();
@@ -19,14 +20,16 @@ export const AdminLayout: React.FC<Props> = ({ children }) => {
     <div className="flex h-screen flex-col">
       <Head title={"AliPróximo - Admin"} />
       <Header className="z-20 col-span-3 max-h-8" />
-      <div className="drawer drawer-mobile bg-[#A9A9A9]">
+      <div className="drawer drawer-mobile">
         <input
           id="aside-drawer"
           type="checkbox"
           className="drawer-toggle"
           onChange={() => setDrawer((old) => !old)}
         />
-        <div className="drawer-content flex flex-col items-center justify-center">
+        <div
+          className={`drawer-content flex flex-col items-center justify-center bg-[#F5F5F5] ${className}`}
+        >
           {children}
         </div>
         <div className="drawer-side">
