@@ -8,9 +8,6 @@ module.exports = {
       light: {
         ...require("daisyui/src/colors/themes")["[data-theme=light]"],
         neutral: "#2A586C",
-        '.input-bordered': {
-          'border-color': '#000000',
-        },
         '.btn-outline': {
           'border-color': '#000000',
         }

@@ -1,4 +1,11 @@
+/* eslint-disable abcsize/abcsize */
+/* eslint-disable complexity */
 import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import type { AppRouter } from "@aliproximo/api";
+import { inputValidators } from "@aliproximo/api/validators";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { inferProcedureInput } from "@trpc/server";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
@@ -6,25 +13,30 @@ import Image from "next/image";
 import { Header } from "../../../components";
 import { useModal } from "../../../utils";
 
-// import type { AppRouter } from "@aliproximo/api";
-// import type { inferProcedureOutput } from "@trpc/server";
-/* const PostCard: React.FC<{
-  post: inferProcedureOutput<AppRouter["post"]["all"]>[number];
-}> = ({ post }) => {
-  return (
-    <div className="max-w-2xl rounded-lg border-2 border-gray-500 p-4 transition-all hover:scale-[101%]">
-      <h2 className="text-2xl font-bold text-[hsl(280,100%,70%)]">
-        {post.title}
-      </h2>
-      <p>{post.content}</p>
-    </div>
-  );
-}; */
+type Inputs = inferProcedureInput<AppRouter["store"]["create"]> & {
+  file: File;
+};
 
 const Home: NextPage = () => {
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
   const { Modal, open: openModal } = useModal();
+  const {
+    register,
+    handleSubmit,
+    formState: { isValid, errors },
+    setValue,
+  } = useForm<Inputs>({
+    defaultValues: {
+      logoFilename: fileData?.name,
+    },
+    mode: "onBlur",
+    resolver: zodResolver(inputValidators["store"]["create"]),
+  });
+  const onSubmit: SubmitHandler<Inputs> = (data: Inputs) => {
+    console.log({ data }); // eslint-disable-line no-console
+    openModal();
+  };
 
   return (
     <div className="flex h-screen flex-col">
@@ -42,10 +54,7 @@ const Home: NextPage = () => {
           Cadastro de Loja
         </h1>
         <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            openModal();
-          }}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex w-full flex-col"
         >
           <div className="flex flex-col items-center md:items-start md:px-6">
@@ -58,9 +67,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="registerNumber"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.registerNumber ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.registerNumber ? "true" : "false"}
+                  {...register("registerNumber")}
                 />
+                {errors.registerNumber && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.registerNumber.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -70,9 +89,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="name"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.name ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.name ? "true" : "false"}
+                  {...register("name")}
                 />
+                {errors.name && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.name.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -80,9 +109,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="whatsapp"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.whatsapp ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.whatsapp ? "true" : "false"}
+                  {...register("whatsapp")}
                 />
+                {errors.whatsapp && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.whatsapp.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -90,8 +129,9 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="categoryName"
+                  disabled
+                  placeholder="Em Breve"
+                  className="input-bordered input input-md w-full max-w-xs border-black md:max-w-md"
                 />
               </div>
               <div className="indicator m-8">
@@ -172,6 +212,7 @@ const Home: NextPage = () => {
                   if (e.target.files !== null && e.target.files.length > 0) {
                     const fileData = e.target.files[0]!; //eslint-disable-line @typescript-eslint/no-non-null-assertion
                     setFile(fileData);
+                    setValue("logoFilename", fileData.name);
                   }
                 }}
               />
@@ -186,9 +227,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="postalCode"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.postalCode ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.address?.postalCode ? "true" : "false"}
+                  {...register("address.postalCode")}
                 />
+                {errors.address?.postalCode && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.address?.postalCode.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -196,29 +247,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="address"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.address ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.address?.address ? "true" : "false"}
+                  {...register("address.address")}
                 />
-              </div>
-              <div className="w-full max-w-xs md:max-w-md">
-                <label className="label">
-                  <span className="label-text">Estado</span>
-                </label>
-                <input
-                  type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="state"
-                />
-              </div>
-              <div className="w-full max-w-xs md:max-w-md">
-                <label className="label">
-                  <span className="label-text">Cidade</span>
-                </label>
-                <input
-                  type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="city"
-                />
+                {errors.address?.address && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.address?.address.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -226,19 +267,61 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="neighborhood"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.neighborhood
+                      ? "input-error"
+                      : "border-black"
+                  }`}
+                  aria-invalid={errors.address?.neighborhood ? "true" : "false"}
+                  {...register("address.neighborhood")}
                 />
+                {errors.address?.neighborhood && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.address?.neighborhood.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
-                  <span className="label-text">Número</span>
+                  <span className="label-text">Estado</span>
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="number"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.state ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.address?.state ? "true" : "false"}
+                  {...register("address.state")}
                 />
+                {errors.address?.state && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.address?.state.message}
+                    </span>
+                  </label>
+                )}
+              </div>
+              <div className="w-full max-w-xs md:max-w-md">
+                <label className="label">
+                  <span className="label-text">Cidade</span>
+                </label>
+                <input
+                  type="text"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.city ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.address?.city ? "true" : "false"}
+                  {...register("address.city")}
+                />
+                {errors.address?.city && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.address?.city.message}
+                    </span>
+                  </label>
+                )}
               </div>
             </div>
           </div>
@@ -253,19 +336,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="firstName"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.owner?.name ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.owner?.name ? "true" : "false"}
+                  {...register("owner.name")}
                 />
-              </div>
-              <div className="w-full max-w-xs md:max-w-md">
-                <label className="label">
-                  <span className="label-text">Sobrenome do responsável</span>
-                </label>
-                <input
-                  type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="lastName"
-                />
+                {errors.owner?.name && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.owner?.name.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -273,9 +356,20 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.owner?.email ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.owner?.email ? "true" : "false"}
                   id="email"
+                  {...register("owner.email")}
                 />
+                {errors.owner?.email && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.owner?.email.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
@@ -283,9 +377,19 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="input-bordered input input-md w-full max-w-xs md:max-w-md"
-                  id="phone"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.owner?.phone ? "input-error" : "border-black"
+                  }`}
+                  aria-invalid={errors.owner?.phone ? "true" : "false"}
+                  {...register("owner.phone")}
                 />
+                {errors.owner?.phone && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.owner?.phone.message}
+                    </span>
+                  </label>
+                )}
               </div>
             </div>
           </div>
@@ -296,7 +400,7 @@ const Home: NextPage = () => {
           <div className="flex w-full justify-center xl:pb-6">
             <input
               type="submit"
-              // disabled={true}
+              disabled={!isValid}
               className="btn-outline btn btn-block text-xl xl:max-w-2xl"
               value="Cadastrar"
             />
