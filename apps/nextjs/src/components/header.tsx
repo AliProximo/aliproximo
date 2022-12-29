@@ -1,8 +1,13 @@
 import Image from "next/image";
 
-export const Header: React.FC = () => {
+type Props = React.HTMLAttributes<HTMLHeadingElement>;
+
+export const Header: React.FC<Props> = ({ className, ...props }) => {
   return (
-    <header className="bg-neutral min-h-8 sticky top-0 left-0 z-10 flex flex-col justify-center">
+    <header
+      className={`bg-neutral min-h-8 sticky top-0 left-0 z-10 flex flex-col justify-center ${className}`}
+      {...props}
+    >
       <Image
         className="ml-12"
         src={"/brand.png"}
