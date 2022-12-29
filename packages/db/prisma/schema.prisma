@@ -22,7 +22,7 @@ model Address {
   state        String
   city         String
   neighborhood String
-  street       String
+  street       String?
   country      String  @default("Brasil")
   address      String // NOTE: Complemento
   // NOTE: MySQL Spatial Docs
@@ -43,8 +43,8 @@ model Address {
   // https://dev.mysql.com/doc/refman/8.0/en/spatial-relation-functions-object-shapes.html#function_st-distance
   // ----- Query
   // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#unsupported-types
-  longitude    String // MySQL uses double-precision (8-byte) to represent coordinates
-  latitude     String
+  longitude    String? // MySQL uses double-precision (8-byte) to represent coordinates
+  latitude     String?
   stores       Store[]
 }
 
