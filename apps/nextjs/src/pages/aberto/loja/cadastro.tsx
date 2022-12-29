@@ -9,18 +9,35 @@ import type { inferProcedureInput } from "@trpc/server";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 import { Header } from "../../../components";
-import { useModal } from "../../../utils";
+import { trpc, useAWS, useFeedback, useModal, withAuth } from "../../../utils";
 
 type Inputs = inferProcedureInput<AppRouter["store"]["create"]> & {
   file: File;
 };
 
 const Home: NextPage = () => {
+  const { data: sessionData } = useSession();
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
-  const { Modal, open: openModal } = useModal();
+  const router = useRouter();
+  const { Modal, open: openModal } = useModal({
+    onClose: () => router.replace("/admin"),
+  });
+  const { Messages, addFeedback } = useFeedback();
+  const { upload } = useAWS();
+  const uploadFile = upload({
+    successCallback: () => {
+      addFeedback("Foto carregada com sucesso");
+    },
+    errorCallback: () => {
+      addFeedback("ERRO: Envio da Foto não concluído");
+    },
+  });
+
   const {
     register,
     handleSubmit,
@@ -33,9 +50,26 @@ const Home: NextPage = () => {
     mode: "onBlur",
     resolver: zodResolver(inputValidators["store"]["create"]),
   });
-  const onSubmit: SubmitHandler<Inputs> = (data: Inputs) => {
-    console.log({ data }); // eslint-disable-line no-console
-    openModal();
+
+  const { mutate: createStore } = trpc.store.create.useMutation({
+    onError: (error) =>
+      addFeedback(`ERRO: Falha ao cadastrar loja, ${error.message}`),
+    onSuccess: () => openModal(),
+  });
+
+  const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (sessionData === null) return;
+
+    const remotePath = `loja/${sessionData.user.id}/${fileData?.name}`;
+    await uploadFile({
+      file: fileData,
+      remotePath,
+    }).then(() =>
+      createStore({
+        ...data,
+        logoFilename: remotePath,
+      }),
+    );
   };
 
   return (
@@ -407,6 +441,7 @@ const Home: NextPage = () => {
           </div>
         </form>
       </main>
+      <div className="toast">{Messages}</div>
       <Modal>
         <div className="flex w-full flex-col items-center pt-12 pb-12">
           <Image
@@ -420,7 +455,8 @@ const Home: NextPage = () => {
           </h1>
           <span className="text-center text-xl">
             Seu cadastro será analisado e, se estiver tudo certo, uma resposta
-            vai ser enviada para o seu e-mail cadastrado
+            vai ser enviada para o seu e-mail cadastrado. Contudo, já é possível
+            acessar o painel da loja, ao fechar esse alerta será redirecionado.
           </span>
         </div>
       </Modal>
@@ -428,4 +464,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default withAuth(Home);
