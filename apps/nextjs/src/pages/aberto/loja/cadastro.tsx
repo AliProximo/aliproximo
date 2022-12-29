@@ -228,6 +228,7 @@ const Home: NextPage = () => {
                   )}
                 </label>
               </div>
+              {/* TODO: https://daisyui.com/components/file-input/ */}
               <input
                 type="file"
                 id="add-single-img"
