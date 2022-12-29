@@ -22,12 +22,20 @@ export const authOptions: NextAuthOptions = {
           where: {
             id: user.id,
           },
+          include: {
+            store: {
+              include: {
+                logo: true
+              }
+            }
+          }
         })
         session.user.id = user.id
         session.user.role =
           user.email === env.ADMIN_EMAIL
             ? Role['Admin']
             : userData?.role ?? Role['User']
+        session.user.store = userData?.store ?? undefined
         session.user.storeId = userData?.storeId ?? undefined
       }
       return session

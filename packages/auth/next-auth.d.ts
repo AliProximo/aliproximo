@@ -1,4 +1,4 @@
-import { Role } from "@aliproximo/db";
+import { Photo, Role, Store } from "@aliproximo/db";
 import { type DefaultSession,DefaultSession  } from "next-auth";
 
 /**
@@ -14,6 +14,7 @@ declare module "next-auth" {
       id: string;
       role: Role;
       storeId?: string;
+      store?: Store & { logo: Photo };
     } & DefaultSession["user"];
   }
 }

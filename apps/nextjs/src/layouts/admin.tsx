@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -30,46 +31,58 @@ export const AdminLayout: React.FC<Props> = ({ children }) => {
         </div>
         <div className="drawer-side">
           <label htmlFor="aside-drawer" className="drawer-overlay"></label>
-          <ul className="menu text-base-content flex w-80 justify-center gap-y-4 bg-[#D9D9D9]">
-            {sessionData?.user.role === "Admin" ? (
+          <div className="menu text-base-content flex w-40 flex-col justify-center bg-[#D9D9D9] md:w-80">
+            {sessionData?.user.store && (
+              <figure className="bg-base-100 mb-12 flex h-[100px] w-[100px] justify-center self-center border border-black">
+                <Image
+                  src={sessionData?.user.store.logo.url}
+                  alt={`logo da empresa ${sessionData?.user.store.name}`}
+                  width={100}
+                  height={100}
+                />
+              </figure>
+            )}
+            <ul className="flex flex-col gap-y-4">
+              {sessionData?.user.role === "Admin" ? (
+                <li
+                  className={`rounded-none ${
+                    router.pathname === "/admin/lojas"
+                      ? "bg-[#379AC4]"
+                      : "bg-[#AAAAAA]"
+                  }`}
+                >
+                  <Link href={"/admin/lojas"}>
+                    <span>Todas as Lojas</span>
+                  </Link>
+                </li>
+              ) : (
+                <></>
+              )}
               <li
                 className={`rounded-none ${
-                  router.pathname === "/admin/lojas"
+                  router.pathname === `/admin/loja`
                     ? "bg-[#379AC4]"
                     : "bg-[#AAAAAA]"
                 }`}
               >
-                <Link href={"/admin/lojas"}>
-                  <span>Todas as Lojas</span>
+                <Link href={`/admin/loja`}>
+                  <span>Dados da Loja</span>
                 </Link>
               </li>
-            ) : (
-              <></>
-            )}
-            <li
-              className={`rounded-none ${
-                router.pathname === `/admin/loja`
-                  ? "bg-[#379AC4]"
-                  : "bg-[#AAAAAA]"
-              }`}
-            >
-              <Link href={`/admin/loja`}>
-                <span>Dados da Loja</span>
-              </Link>
-            </li>
-            <li
-              className={`rounded-none ${
-                router.pathname === "/admin/produtos"
-                  ? "bg-[#379AC4]"
-                  : "bg-[#AAAAAA]"
-              }`}
-            >
-              <Link href={"/admin/produtos"}>
-                <span>Produtos</span>
-              </Link>
-            </li>
+              <li
+                className={`rounded-none ${
+                  router.pathname === "/admin/produtos"
+                    ? "bg-[#379AC4]"
+                    : "bg-[#AAAAAA]"
+                }`}
+              >
+                <Link href={"/admin/produtos"}>
+                  <span>Produtos</span>
+                </Link>
+              </li>
+            </ul>
             <button className="btn m-4 text-white">Sair</button>
-          </ul>
+          </div>
         </div>
       </div>
       <div
