@@ -95,35 +95,7 @@ export const storeRouter = router({
       });
     }),
   update: storeProcedure
-    .input(
-      z.object({
-        id: z.string().cuid(),
-        name: z.string().optional(),
-        registerNumber: z.string().optional(),
-        whatsapp: z.string().optional(),
-        address: z
-          .object({
-            postalCode: z.string(),
-            city: z.string(),
-            latitude: z.string(),
-            longitude: z.string(),
-            neighborhood: z.string(),
-            state: z.string(),
-            street: z.string(),
-            country: z.string(),
-            address: z.string(),
-          })
-          .optional(),
-        logoFilename: z.string().optional(),
-        owner: z
-          .object({
-            email: z.string().email(),
-            name: z.string(),
-            phone: z.string(),
-          })
-          .optional(),
-      }),
-    )
+    .input(storeInputValidators['update'])
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id },
