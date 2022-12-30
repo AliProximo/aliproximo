@@ -23,8 +23,13 @@ const Home: NextPage = () => {
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
   const router = useRouter();
+  const utils = trpc.useContext();
   const { Modal, open: openModal } = useModal({
-    onClose: () => router.replace("/admin"),
+    onClose: () => {
+      // NOTE: empty ADMIN panel, needs to refetch info
+      utils.auth.getSession.refetch();
+      router.replace("/admin");
+    },
   });
   const { Messages, addFeedback } = useFeedback();
   const { upload } = useAWS();
