@@ -1,3 +1,4 @@
+/* eslint-disable abcsize/abcsize */
 import { useState } from "react";
 import {
   FieldPath,
@@ -48,7 +49,7 @@ const AdminStore: NextPage = () => {
   const { data: storeData, refetch } = trpc.store.byId.useQuery(
     sessionData?.user.storeId ?? "",
     {
-      onSuccess: (store) =>
+      onSuccess: (store) => {
         getkeys(store)
           .map(
             (path) =>
@@ -59,7 +60,9 @@ const AdminStore: NextPage = () => {
           )
           .forEach(([path, value]) => {
             if (value !== null) methods.setValue(path, value);
-          }),
+          });
+        methods.setValue("logoFilename", store?.logo.name);
+      },
       placeholderData: sessionData?.user.store,
       staleTime: Infinity,
     },
@@ -71,7 +74,7 @@ const AdminStore: NextPage = () => {
       address: {
         ...removeEmpty(storeData?.address ?? {}),
       },
-      logoFilename: fileData?.name,
+      logoFilename: storeData?.logo.name,
     },
     mode: "onBlur",
     resolver: zodResolver(inputValidators["store"]["update"]),
@@ -123,6 +126,17 @@ const AdminStore: NextPage = () => {
     });
   };
 
+  const fileUrl = fileData
+    ? URL.createObjectURL(fileData)
+    : storeData?.logo.url;
+
+  const getFileName = (url?: string) => {
+    if (!url) return "";
+    const isLocalUrl = (url: string) => url.startsWith("blob");
+    if (isLocalUrl(url)) return url;
+    return url.split("/").pop();
+  };
+
   return (
     <>
       <AdminLayout>
@@ -164,6 +178,16 @@ const AdminStore: NextPage = () => {
                         }
                       }}
                     />
+                    <button className="btn btn-link">
+                      <a
+                        href={fileUrl ?? "#"}
+                        className="link"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {getFileName(methods.getValues("logoFilename"))}
+                      </a>
+                    </button>
                   </div>
                 </div>
               </div>
