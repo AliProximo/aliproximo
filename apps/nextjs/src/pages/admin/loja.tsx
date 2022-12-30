@@ -1,8 +1,10 @@
 import { HTMLAttributes, useState } from "react";
 import {
   FieldError,
+  FieldErrors,
   FieldPath,
   FieldValue,
+  FieldValues,
   FormProvider,
   SubmitHandler,
   useForm,
@@ -24,16 +26,32 @@ type Inputs = inferProcedureInput<AppRouter["store"]["update"]> & {
   file: File;
 };
 
-type Props = HTMLAttributes<HTMLInputElement> & {
-  name: FieldPath<Inputs>;
+interface Props<T extends FieldValues = FieldValues> {
+  name: FieldPath<T>;
   title?: string;
-};
+}
 
-const TextInput = ({ name, title, ...props }: Props) => {
+const TextInput = <T extends FieldValues = FieldValues>({
+  name,
+  title,
+  ...props
+}: HTMLAttributes<HTMLInputElement> & Props<T>) => {
   const {
     register,
     formState: { errors },
-  } = useFormContext<Inputs>();
+  } = useFormContext<T>();
+
+  function getErrorLabel() {
+    const error = get<FieldErrors<T>, FieldError>(errors, name);
+
+    if (error === null) return <></>;
+
+    return (
+      <label className="label">
+        <span className="label-text-alt">{error.message}</span>
+      </label>
+    );
+  }
 
   return (
     <div className="w-full max-w-xs md:max-w-md">
@@ -43,31 +61,26 @@ const TextInput = ({ name, title, ...props }: Props) => {
       <input
         type="text"
         className={`input input-md w-full max-w-xs md:max-w-md ${
-          get(errors, name) ? "input-error" : "input-bordered"
+          get<FieldErrors<T>, FieldError>(errors, name)
+            ? "input-error"
+            : "input-bordered"
         }`}
         aria-invalid={errors.registerNumber ? "true" : "false"}
         {...props}
         {...register(name)}
       />
-      {get(errors, name) ? (
-        <label className="label">
-          <span className="label-text-alt">
-            {(get(errors, name) as FieldError).message}
-          </span>
-        </label>
-      ) : (
-        <></>
-      )}
+      {getErrorLabel()}
     </div>
   );
 };
 
 /* https://stackoverflow.com/questions/32141291/javascript-reflection-get-nested-objects-path */
 
-function isobject(x: any) {
+function isobject(x: unknown) {
   return Object.prototype.toString.call(x) === "[object Object]";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getkeys(obj: any, prefix = "") {
   const keys = Object.keys(obj);
   prefix = prefix ? prefix + "." : "";
@@ -110,9 +123,9 @@ const AdminStore: NextPage = () => {
         getkeys(store)
           .map(
             (path) =>
-              [path, get(store, path)] as [
+              [path, get<FieldValue<Inputs>, string>(store, path)] as [
                 FieldPath<Inputs>,
-                FieldValue<Inputs>,
+                string,
               ],
           )
           .forEach(([path, value]) => {
@@ -196,9 +209,12 @@ const AdminStore: NextPage = () => {
                   Preencha com os dados do seu negócio
                 </h3>
                 <div className="form-control container grid grid-cols-1 justify-items-center xl:grid-cols-2 xl:gap-x-6 xl:pl-36">
-                  <TextInput name="registerNumber" title={"CNPJ ou CPF"} />
-                  <TextInput name="name" title={"Nome"} />
-                  <TextInput name="whatsapp" title={"WhatsApp"} />
+                  <TextInput<Inputs>
+                    name="registerNumber"
+                    title={"CNPJ ou CPF"}
+                  />
+                  <TextInput<Inputs> name="name" title={"Nome"} />
+                  <TextInput<Inputs> name="whatsapp" title={"WhatsApp"} />
                   <div className="form-control max-w-xs">
                     <label className="label">
                       <span className="label-text">Logotipo</span>
@@ -225,11 +241,17 @@ const AdminStore: NextPage = () => {
               <div className="flex flex-col items-center md:items-start md:px-6">
                 <h2 className="text-2xl font-bold">Endereço</h2>
                 <div className="form-control container grid grid-cols-1 justify-items-center md:grid-cols-2 md:gap-x-6 lg:pl-36">
-                  <TextInput name="address.postalCode" title={"CEP"} />
-                  <TextInput name="address.address" title={"Endereço"} />
-                  <TextInput name="address.neighborhood" title={"Bairro"} />
-                  <TextInput name="address.state" title={"Estado"} />
-                  <TextInput name="address.city" title={"Cidade"} />
+                  <TextInput<Inputs> name="address.postalCode" title={"CEP"} />
+                  <TextInput<Inputs>
+                    name="address.address"
+                    title={"Endereço"}
+                  />
+                  <TextInput<Inputs>
+                    name="address.neighborhood"
+                    title={"Bairro"}
+                  />
+                  <TextInput<Inputs> name="address.state" title={"Estado"} />
+                  <TextInput<Inputs> name="address.city" title={"Cidade"} />
                 </div>
               </div>
               <div className="flex flex-col items-center md:items-start md:px-6">
@@ -237,12 +259,15 @@ const AdminStore: NextPage = () => {
                   Informações do representante legal
                 </h2>
                 <div className="form-control container grid grid-cols-1 justify-items-center md:grid-cols-2 md:gap-x-6 lg:pl-36">
-                  <TextInput name="owner.name" title={"Nome do responsável"} />
-                  <TextInput
+                  <TextInput<Inputs>
+                    name="owner.name"
+                    title={"Nome do responsável"}
+                  />
+                  <TextInput<Inputs>
                     name="owner.email"
                     title={"E-mail do responsável"}
                   />
-                  <TextInput
+                  <TextInput<Inputs>
                     name="owner.phone"
                     title={"Celular do responsável"}
                   />
