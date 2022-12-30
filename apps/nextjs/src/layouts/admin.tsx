@@ -2,7 +2,7 @@ import { HTMLAttributes, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import { Head, Header } from "../components";
 
@@ -88,7 +88,15 @@ export const AdminLayout: React.FC<Props> = ({
                 </Link>
               </li>
             </ul>
-            <button className="btn m-4 text-white">Sair</button>
+            <button
+              className="btn m-4 text-white"
+              onClick={() => {
+                signOut();
+                router.replace("/");
+              }}
+            >
+              Sair
+            </button>
           </div>
         </div>
       </div>
