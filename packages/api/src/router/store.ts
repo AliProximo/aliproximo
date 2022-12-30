@@ -32,7 +32,7 @@ export const storeRouter = router({
     });
   }),
   create: protectedProcedure
-    .input(storeInputValidators['create'])
+    .input(storeInputValidators["create"])
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id },
@@ -62,8 +62,8 @@ export const storeRouter = router({
           ...rest,
           users: {
             connect: {
-              id: user.id
-            }
+              id: user.id,
+            },
           },
           logo: {
             create: {
@@ -88,14 +88,14 @@ export const storeRouter = router({
           verified: isTrustedSource,
           creator: {
             connect: {
-              id: user.id
-            }
-          }
+              id: user.id,
+            },
+          },
         },
       });
     }),
   update: storeProcedure
-    .input(storeInputValidators['update'])
+    .input(storeInputValidators["update"])
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id },
