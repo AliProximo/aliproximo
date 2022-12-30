@@ -6,7 +6,7 @@ import { env } from '../env/server.mjs'
 import { createRbacProcedure, router } from '../trpc'
 
 const awsProcedure = createRbacProcedure({
-  requiredRoles: ['Admin', 'Editor'],
+  requiredRoles: ['Admin', 'Manager', 'Editor', 'User'],
 })
 
 export const awsRouter = router({

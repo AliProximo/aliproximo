@@ -14,14 +14,19 @@ import {
 import { storeInputValidators } from "../validators/input/store";
 
 const storeProcedure = createRbacProcedure({
-  requiredRoles: ["Admin", "Moderator"],
+  requiredRoles: ["Admin", "Manager"],
 });
 const adminProcedure = createRbacProcedure({ requiredRoles: ["Admin"] });
+
+const isAdmin = (user?: { email?: string | null; role: Role }) =>
+  user?.email === env.ADMIN_EMAIL || user?.role === "Admin";
 
 export const storeRouter = router({
   all: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.store.findMany({
-      where: { verified: { equals: true } },
+      where: !isAdmin(ctx.session?.user)
+        ? { verified: { equals: true } }
+        : undefined,
       include: { logo: true },
     });
   }),
@@ -45,7 +50,7 @@ export const storeRouter = router({
       /* is user default admin? skip validations */
       if (user.email !== env.ADMIN_EMAIL) {
         /* does user belong to a store? */
-        if (user.storeId !== undefined) {
+        if (user.storeId !== null) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
@@ -86,11 +91,6 @@ export const storeRouter = router({
             },
           },
           verified: isTrustedSource,
-          creator: {
-            connect: {
-              id: user.id,
-            },
-          },
         },
       });
     }),

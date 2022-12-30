@@ -1,15 +1,16 @@
-import { Role } from '@aliproximo/db'
-import { TRPCError } from '@trpc/server'
-import { z } from 'zod'
+import { Role } from "@aliproximo/db";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
-import { createRbacProcedure, router } from '../trpc'
+import { env } from "../env/server.mjs";
+import { createRbacProcedure, router } from "../trpc";
 
 const userProcedure = createRbacProcedure({
   requiredRoles: ["Admin", "Manager", "Moderator"],
-})
+});
 const adminProcedure = createRbacProcedure({
   requiredRoles: ["Admin"],
-})
+});
 
 export const userRouter = router({
   all: userProcedure
@@ -21,7 +22,7 @@ export const userRouter = router({
         // TODO: pagination
         // take: z.number().gte(0).optional(),
         // skip: z.number().gte(0).optional(),
-      })
+      }),
     )
     .query(({ ctx, input }) => {
       return ctx.prisma.user.findMany({
@@ -37,9 +38,9 @@ export const userRouter = router({
           role: {
             in: input.roles,
           },
-          active: input.active
-        }
-      })
+          active: input.active,
+        },
+      });
     }),
   update: userProcedure
     .input(
@@ -47,24 +48,30 @@ export const userRouter = router({
         id: z.string().cuid(),
         active: z.boolean().optional(),
         role: z.nativeEnum(Role).optional(),
-      })
+        storeId: z.string().cuid().optional(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id },
-      })
+      });
 
       if (!user) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      /* is user changing self? */
-      if (input.id === user.id) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
-      }
-      /* is user attempting to give role greater than self? */
-      if (input.role && Role[user.role] > Role[input.role]) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+      /* is user default admin? skip validations */
+      if (user?.email !== env.ADMIN_EMAIL) {
+        /* is non Admin user changing self? */
+        if (user.role !== "Admin") {
+          if (input.id === user.id) {
+            throw new TRPCError({ code: "UNAUTHORIZED" });
+          }
+        }
+        /* is user attempting to give role greater than self? */
+        if (input.role && Role[user.role] > Role[input.role]) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
 
       return ctx.prisma.user.update({
@@ -74,27 +81,34 @@ export const userRouter = router({
         data: {
           active: input.active,
           role: input.role,
+          store: input.storeId
+            ? {
+                connect: {
+                  id: input.storeId,
+                },
+              }
+            : undefined,
         },
-      })
+      });
     }),
   delete: adminProcedure
     .input(z.object({ id: z.string().cuid() }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id },
-      })
+      });
 
       if (!user) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       /* is user changing self? */
       if (input.id === user.id) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       return ctx.prisma.user.delete({
         where: input,
-      })
+      });
     }),
-})
+});
