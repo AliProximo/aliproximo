@@ -35,7 +35,10 @@ function prettyPrintAuditReport(report: IAuditReport): string {
     .filter((level) => level > 0)
     .reduce((total, level) => total + level, 0);
   const summary = Object.keys(vulnerabilities)
-    .map((level) => ({ level, count: vulnerabilities[level] }))
+    .map((level) => ({
+      level,
+      count: vulnerabilities[level as keyof typeof vulnerabilities],
+    }))
     .filter((levelCount) => levelCount.count > 0)
     .map((levelCount) => `${levelCount.count} ${levelCount.level}`)
     .join(", ");
