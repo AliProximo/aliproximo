@@ -78,14 +78,11 @@ model Store {
   owner          StoreOwner @relation(fields: [ownerEmail], references: [email])
   ownerEmail     String
   users          User[]     @relation("organization")
-  creator        User       @relation("creator", fields: [creatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  creatorId      String
   clothings      Clothing[]
 
   @@index([logoId])
   @@index([postalCode])
   @@index([ownerEmail])
-  @@index([creatorId])
 }
 
 enum SizeOptions {
@@ -191,7 +188,6 @@ model User {
   role          Role      @default(User)
   store         Store?    @relation("organization", fields: [storeId], references: [id])
   storeId       String?
-  createdStores Store[]   @relation("creator")
 
   @@index([storeId])
 }
