@@ -9,7 +9,7 @@ import type { inferProcedureInput } from "@trpc/server";
 import type { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import { Head, Header } from "../../../components";
 import { trpc, useAWS, useFeedback, useModal, withAuth } from "../../../utils";
@@ -22,8 +22,12 @@ const ProtectedCreateStore: NextPage = () => {
   const { data: sessionData } = useSession();
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
+  const router = useRouter();
   const { Modal, open: openModal } = useModal({
-    onClose: signOut,
+    onClose: () => {
+      router.reload();
+      router.replace("/admin");
+    },
   });
   const { Messages, addFeedback } = useFeedback();
   const { upload } = useAWS();
