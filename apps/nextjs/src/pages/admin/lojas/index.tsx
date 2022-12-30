@@ -3,8 +3,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
-import { AdminLayout } from "../../layouts";
-import { trpc, withAuth } from "../../utils";
+import { AdminLayout } from "../../../layouts";
+import { trpc, withAuth } from "../../../utils";
 
 const AdminStores: NextPage = () => {
   const { data: sessionData } = useSession();
