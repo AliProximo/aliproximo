@@ -1,6 +1,6 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 
-import { filterDiffs } from './utils';
+import { filterDiffs } from "./utils";
 
 declare function message(message: string): void;
 declare function warn(message: string): void;
@@ -38,7 +38,7 @@ function prettyPrintAuditReport(report: IAuditReport): string {
     .map((level) => ({ level, count: vulnerabilities[level] }))
     .filter((levelCount) => levelCount.count > 0)
     .map((levelCount) => `${levelCount.count} ${levelCount.level}`)
-    .join(', ');
+    .join(", ");
 
   const title =
     `found ${totalVulnerabilities} vulnerabilities (${summary}) ` +
@@ -57,14 +57,14 @@ export function auditCI(): void {
 
   try {
     before = JSON.parse(
-      fs.readFileSync(`${__dirname}/../.diff/audit-ci/before.json`, 'utf8')
+      fs.readFileSync(`${__dirname}/../.diff/audit-ci/before.json`, "utf8"),
     ) as IAuditReport;
     after = JSON.parse(
-      fs.readFileSync(`${__dirname}/../.diff/audit-ci/after.json`, 'utf8')
+      fs.readFileSync(`${__dirname}/../.diff/audit-ci/after.json`, "utf8"),
     ) as IAuditReport;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.log('yarnAuditCI: error parsing files, skipping rule');
+    console.log("yarnAuditCI: error parsing files, skipping rule");
     // eslint-disable-next-line no-console
     console.log(error);
     return;
@@ -73,21 +73,21 @@ export function auditCI(): void {
   const diffs = filterDiffs<number>(
     before,
     after,
-    (beforeKey, afterKey) => afterKey - beforeKey
+    (beforeKey, afterKey) => afterKey - beforeKey,
   ) as IAuditReport;
   const saferRepo = Object.values(diffs.vulnerabilities).every(
-    (level) => level <= 0
+    (level) => level <= 0,
   );
 
   if (saferRepo) {
-    message(':lock: Thanks for improving our codebase security');
+    message(":lock: Thanks for improving our codebase security");
     return;
   }
   warn(
     prettyPrintAuditReport(
       Object.assign(diffs, {
         totalDependencies: diffs.totalDependencies ?? after.totalDependencies,
-      })
-    )
+      }),
+    ),
   );
 }
