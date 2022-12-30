@@ -9,7 +9,7 @@ import type { inferProcedureInput } from "@trpc/server";
 import type { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import { Head, Header } from "../../../components";
 import { trpc, useAWS, useFeedback, useModal, withAuth } from "../../../utils";
@@ -22,14 +22,8 @@ const Home: NextPage = () => {
   const { data: sessionData } = useSession();
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
-  const router = useRouter();
-  const utils = trpc.useContext();
   const { Modal, open: openModal } = useModal({
-    onClose: () => {
-      // NOTE: empty ADMIN panel, needs to refetch info
-      utils.auth.getSession.refetch();
-      router.replace("/admin");
-    },
+    onClose: signOut,
   });
   const { Messages, addFeedback } = useFeedback();
   const { upload } = useAWS();
