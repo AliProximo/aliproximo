@@ -16,6 +16,7 @@ export function isobject(x: unknown) {
 /** transform object keys in path string, arg to get functions from {radash, lodash} */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getkeys(obj: any, prefix = "") {
+  if (!obj) return [] as string[];
   const keys = Object.keys(obj);
   prefix = prefix ? prefix + "." : "";
   return keys.reduce((result, key) => {
