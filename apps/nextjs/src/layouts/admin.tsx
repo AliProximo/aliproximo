@@ -53,7 +53,7 @@ export const AdminLayout: React.FC<Props> = ({
               {sessionData?.user.role === "Admin" ? (
                 <li
                   className={`rounded-none ${
-                    router.pathname === "/admin/lojas"
+                    router.pathname.startsWith("/admin/lojas")
                       ? "bg-[#379AC4]"
                       : "bg-[#AAAAAA]"
                   }`}
@@ -67,7 +67,7 @@ export const AdminLayout: React.FC<Props> = ({
               )}
               <li
                 className={`rounded-none ${
-                  router.pathname === `/admin/loja`
+                  router.pathname.startsWith(`/admin/loja`)
                     ? "bg-[#379AC4]"
                     : "bg-[#AAAAAA]"
                 }`}
@@ -78,7 +78,7 @@ export const AdminLayout: React.FC<Props> = ({
               </li>
               <li
                 className={`rounded-none ${
-                  router.pathname === "/admin/produtos"
+                  router.pathname.startsWith("/admin/produtos")
                     ? "bg-[#379AC4]"
                     : "bg-[#AAAAAA]"
                 }`}
