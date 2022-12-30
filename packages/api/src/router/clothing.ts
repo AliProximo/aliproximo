@@ -374,13 +374,8 @@ export const clothingRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      function getDeletePromise({
-        key,
-      }: {
-        key: string | undefined;
-      }) {
-        if (key === undefined)
-          return new Promise<void>((resolve) => resolve());
+      function getDeletePromise({ key }: { key: string | undefined }) {
+        if (key === undefined) return new Promise<void>((resolve) => resolve());
 
         const command = new DeleteObjectCommand({
           Bucket: env.S3_BUCKET_NAME,
@@ -396,18 +391,23 @@ export const clothingRouter = router({
       // https://www.prisma.io/docs/concepts/components/prisma-client/transactions#sequential-prisma-client-operations
       return getDeletePromise({
         key: clothing.product.photo?.name,
-      }).then(() =>
-          ctx.prisma.photo.delete({
-            where: { id: clothing.product.photoId ?? undefined },
-          }),
-        )
-        .then(() =>
-          ctx.prisma.product.delete({
-            where: {
-              id: clothing.product.id,
-            },
-          }),
-        )
+      })
+        .then(() => {
+          if (clothing.product.photoId) {
+            ctx.prisma.photo.delete({
+              where: { id: clothing.product.photoId },
+            });
+          }
+        })
+        .then(() => {
+          if (clothing.product.id) {
+            ctx.prisma.product.delete({
+              where: {
+                id: clothing.product.id,
+              },
+            });
+          }
+        })
         .then(() =>
           ctx.prisma.clothing.delete({
             where: { id: clothing.id },
