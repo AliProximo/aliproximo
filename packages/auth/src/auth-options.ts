@@ -25,37 +25,39 @@ export const authOptions: NextAuthOptions = {
           include: {
             store: {
               include: {
-                logo: true
-              }
-            }
-          }
-        })
-        session.user.id = user.id
+                logo: true,
+                address: true,
+                owner: true,
+              },
+            },
+          },
+        });
+        session.user.id = user.id;
         session.user.role =
           user.email === env.ADMIN_EMAIL
-            ? Role['Admin']
-            : userData?.role ?? Role['User']
-        session.user.store = userData?.store ?? undefined
-        session.user.storeId = userData?.storeId ?? undefined
+            ? Role["Admin"]
+            : userData?.role ?? Role["User"];
+        session.user.store = userData?.store ?? undefined;
+        session.user.storeId = userData?.storeId ?? undefined;
       }
-      return session
+      return session;
     },
     async signIn({ user }) {
-      if (user.email === env.ADMIN_EMAIL) return true
+      if (user.email === env.ADMIN_EMAIL) return true;
 
       const userData = await prisma.user.findUnique({
         where: {
-          id: user.id
+          id: user.id,
         },
-      })
+      });
 
-      const isAllowedToSignIn = !userData || userData.active === true
+      const isAllowedToSignIn = !userData || userData.active === true;
 
       if (isAllowedToSignIn) {
-        return true
+        return true;
       } else {
         // Return false to display a default error message
-        return false
+        return false;
         // Or you can return a URL to redirect to:
         // return '/unauthorized'
       }

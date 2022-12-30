@@ -28,7 +28,7 @@ export const storeRouter = router({
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.prisma.store.findUnique({
       where: { id: input },
-      include: { logo: true },
+      include: { logo: true, address: true, owner: true },
     });
   }),
   create: protectedProcedure
@@ -177,6 +177,11 @@ export const storeRouter = router({
                     },
                   }
                 : undefined,
+            },
+            include: {
+              logo: true,
+              address: true,
+              owner: true,
             },
           }),
         )
