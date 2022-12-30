@@ -18,7 +18,7 @@ type Inputs = inferProcedureInput<AppRouter["store"]["create"]> & {
   file: File;
 };
 
-const Home: NextPage = () => {
+const ProtectedCreateStore: NextPage = () => {
   const { data: sessionData } = useSession();
   const [fileData, setFile] = useState<File | undefined>(undefined);
   const fileUrl = fileData ? URL.createObjectURL(fileData) : undefined;
@@ -456,4 +456,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default withAuth(Home);
+export default withAuth(ProtectedCreateStore);
