@@ -1,14 +1,10 @@
-import { HTMLAttributes, useState } from "react";
+import { useState } from "react";
 import {
-  FieldError,
-  FieldErrors,
   FieldPath,
   FieldValue,
-  FieldValues,
   FormProvider,
   SubmitHandler,
   useForm,
-  useFormContext,
 } from "react-hook-form";
 import type { AppRouter } from "@aliproximo/api";
 import { inputValidators } from "@aliproximo/api/validators";
@@ -19,80 +15,13 @@ import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { get } from "radash";
 
+import { TextInput } from "../../components";
 import { AdminLayout } from "../../layouts";
-import { trpc, useAWS, useFeedback, withAuth } from "../../utils";
+import { getkeys, trpc, useAWS, useFeedback, withAuth } from "../../utils";
 
 type Inputs = inferProcedureInput<AppRouter["store"]["update"]> & {
   file: File;
 };
-
-interface Props<T extends FieldValues = FieldValues> {
-  name: FieldPath<T>;
-  title?: string;
-}
-
-const TextInput = <T extends FieldValues = FieldValues>({
-  name,
-  title,
-  ...props
-}: HTMLAttributes<HTMLInputElement> & Props<T>) => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext<T>();
-
-  function getErrorLabel() {
-    const error = get<FieldErrors<T>, FieldError>(errors, name);
-
-    if (error === null) return <></>;
-
-    return (
-      <label className="label">
-        <span className="label-text-alt">{error.message}</span>
-      </label>
-    );
-  }
-
-  return (
-    <div className="w-full max-w-xs md:max-w-md">
-      <label className="label">
-        <span className="label-text">{title ?? name}</span>
-      </label>
-      <input
-        type="text"
-        className={`input input-md w-full max-w-xs md:max-w-md ${
-          get<FieldErrors<T>, FieldError>(errors, name)
-            ? "input-error"
-            : "input-bordered"
-        }`}
-        aria-invalid={errors.registerNumber ? "true" : "false"}
-        {...props}
-        {...register(name)}
-      />
-      {getErrorLabel()}
-    </div>
-  );
-};
-
-/* https://stackoverflow.com/questions/32141291/javascript-reflection-get-nested-objects-path */
-
-function isobject(x: unknown) {
-  return Object.prototype.toString.call(x) === "[object Object]";
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getkeys(obj: any, prefix = "") {
-  const keys = Object.keys(obj);
-  prefix = prefix ? prefix + "." : "";
-  return keys.reduce((result, key) => {
-    if (isobject(obj[key])) {
-      result = result.concat(getkeys(obj[key], prefix + key));
-    } else {
-      result.push(prefix + key);
-    }
-    return result;
-  }, [] as string[]);
-}
 
 const AdminStore: NextPage = () => {
   const { data: sessionData } = useSession();
