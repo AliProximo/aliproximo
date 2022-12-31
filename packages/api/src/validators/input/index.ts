@@ -1,5 +1,7 @@
-import { storeInputValidators } from "./store"
+import { clothingInputValidators } from "./clothing";
+import { storeInputValidators } from "./store";
 
 export const inputValidators = {
-  'store': storeInputValidators
-}
+  store: storeInputValidators,
+  clothing: clothingInputValidators,
+};

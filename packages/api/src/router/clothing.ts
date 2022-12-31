@@ -7,6 +7,7 @@ import { z } from "zod";
 import { formatAWSfileUrl } from "../common";
 import { env } from "../env/server.mjs";
 import { createRbacProcedure, publicProcedure, router } from "../trpc";
+import { clothingInputValidators } from "../validators/input/clothing";
 
 export const clothingProcedure = createRbacProcedure({
   requiredRoles: ["Admin", "Editor"],
@@ -200,35 +201,7 @@ export const clothingRouter = router({
       });
     }),
   update: clothingProcedure
-    .input(
-      z.object({
-        id: z.string().cuid(),
-        sizes: z.nativeEnum(SizeOptions).array().optional(),
-        // product data
-        name: z.string().optional(),
-        quantity: z.number().int().gte(0).optional(),
-        description: z.string().optional(),
-        price: z
-          .string()
-          .refine(
-            (value) =>
-              isDecimal(value, {
-                decimal_digits: "1,3",
-                locale: "pt-BR",
-              }),
-            {
-              message: "Invalid decimal value",
-            },
-          )
-          .optional(),
-        available: z.boolean().optional(),
-        photoFilename: z.string().optional(),
-        category: z
-          .object({ id: z.string().cuid(), name: z.undefined() })
-          .or(z.object({ id: z.undefined(), name: z.string() }))
-          .optional(),
-      }),
-    )
+    .input(clothingInputValidators["update"])
     .mutation(async ({ ctx, input }) => {
       const clothing = await ctx.prisma.clothing.findUnique({
         where: { id: input.id },
