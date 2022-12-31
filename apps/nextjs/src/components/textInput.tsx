@@ -10,12 +10,20 @@ import { get } from "radash";
 interface Props<T extends FieldValues = FieldValues> {
   name: FieldPath<T>;
   title?: string;
+  textarea?: boolean;
 }
 
-/** NOTE: Depends on FormContext */
+/**
+ * Styled Extensible TSGeneric Text Input
+ * NOTE: Depends on FormContext
+ * @param title input top label
+ * @param name react-hook-form field
+ * @param textarea substitutes input.text for textarea
+ */
 export const TextInput = <T extends FieldValues = FieldValues>({
   name,
   title,
+  textarea,
   ...props
 }: React.HTMLAttributes<HTMLInputElement> & Props<T>) => {
   const {
@@ -40,17 +48,29 @@ export const TextInput = <T extends FieldValues = FieldValues>({
       <label className="label">
         <span className="label-text">{title ?? name}</span>
       </label>
-      <input
-        type="text"
-        className={`input input-md w-full max-w-xs md:max-w-md ${
-          get<FieldErrors<T>, FieldError>(errors, name)
-            ? "input-error"
-            : "input-bordered"
-        }`}
-        aria-invalid={errors.registerNumber ? "true" : "false"}
-        {...props}
-        {...register(name)}
-      />
+      {textarea ? (
+        <textarea
+          className={`textarea ${
+            get<FieldErrors<T>, FieldError>(errors, name)
+              ? "textarea-error"
+              : "textarea-bordered"
+          }`}
+          aria-invalid={errors.registerNumber ? "true" : "false"}
+          {...register(name)}
+        />
+      ) : (
+        <input
+          type="text"
+          className={`input input-md w-full max-w-xs md:max-w-md ${
+            get<FieldErrors<T>, FieldError>(errors, name)
+              ? "input-error"
+              : "input-bordered"
+          }`}
+          aria-invalid={errors.registerNumber ? "true" : "false"}
+          {...props}
+          {...register(name)}
+        />
+      )}
       {getErrorLabel()}
     </div>
   );

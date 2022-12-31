@@ -1,13 +1,14 @@
 import { useState } from "react";
 import type { NextPage } from "next";
 import Image from "next/image";
-// import { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
 import { AdminLayout } from "../../../layouts";
 import { currencyFormatter, trpc, useFeedback, withAuth } from "../../../utils";
 
 const AdminProducts: NextPage = () => {
+  const router = useRouter();
   const { data: sessionData } = useSession();
   const [name, setName] = useState<string | undefined>(undefined);
   const { data: allClothings, refetch } = trpc.clothing.all.useQuery(
@@ -18,19 +19,40 @@ const AdminProducts: NextPage = () => {
       enabled: !!sessionData?.user,
     },
   );
-  const { Messages /* addFeedback */ } = useFeedback();
-  // const router = useRouter();
+  const { Messages, addFeedback } = useFeedback();
 
   const { mutate: create } = trpc.clothing.create.useMutation({
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      refetch();
+      setName(undefined);
+    },
   });
+
+  const { mutate: updateClothing } = trpc.clothing.update.useMutation({
+    onSuccess: () => {
+      addFeedback(`Produto atualizado`);
+    },
+  });
+  const toggleAvailability = ({
+    id,
+    available,
+  }: {
+    id: string;
+    available: boolean;
+  }) => updateClothing({ id, available: !available });
 
   const { mutate: deleteClothing } = trpc.clothing.delete.useMutation({
     onSuccess: () => refetch(),
   });
 
   const createClothes = () => {
-    if (name && sessionData?.user.storeId) {
+    if (
+      name &&
+      sessionData?.user.storeId &&
+      true
+      // TODO: when filtering by name exists
+      // (allClothings?.length ?? 1) === 0
+    ) {
       create({ storeId: sessionData?.user.storeId, name });
     }
   };
@@ -40,22 +62,33 @@ const AdminProducts: NextPage = () => {
       <AdminLayout>
         <div className="container mt-12 flex flex-col xl:pl-12">
           <h1 className="mb-20 text-2xl font-bold">Lista de Produtos</h1>
-          <div className="flex w-full max-w-xs items-end gap-4 md:max-w-md lg:max-w-2xl xl:pl-11">
+          <form
+            className="flex w-full max-w-xs items-end gap-4 md:max-w-md lg:max-w-2xl xl:pl-11"
+            onSubmit={(e) => {
+              e.preventDefault();
+              createClothes();
+            }}
+          >
             <div className="flex flex-1 flex-col">
               <label className="label">
-                <span className="label-text">Pesquisar Produtos</span>
+                <span className="label-text">
+                  Pesquisar Produtos | Nome para Cadastro
+                </span>
               </label>
               <input
                 type="text"
-                value={name}
+                value={name ?? ""}
                 className="input input-md w-full max-w-xs md:max-w-md lg:max-w-xl"
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <button className="btn btn-outline" onClick={createClothes}>
-              Adicionar Produto
-            </button>
-          </div>
+            <input
+              type="submit"
+              disabled={!name}
+              className="btn btn-outline"
+              value="Adicionar Produto"
+            />
+          </form>
           <div className="mt-4 flex w-full justify-center overflow-x-auto xl:pr-12">
             {allClothings?.length ?? 0 > 0 ? (
               <table className="table">
@@ -99,13 +132,21 @@ const AdminProducts: NextPage = () => {
                             type="checkbox"
                             className="toggle"
                             defaultChecked={clothing.product.available}
+                            onChange={() =>
+                              toggleAvailability({
+                                id: clothing.id,
+                                available: clothing.product.available,
+                              })
+                            }
                           />
                         </div>
                       </td>
                       <td className="grid max-h-min max-w-xs grid-cols-2 grid-rows-2 items-center justify-center gap-4">
                         <button
                           className="btn glass text-base-100 hover:bg-primary bg-neutral col-span-2"
-                          onClick={() => deleteClothing({ id: clothing.id })}
+                          onClick={() =>
+                            router.push(`/admin/produtos/${clothing.id}`)
+                          }
                         >
                           Editar Produto
                         </button>
