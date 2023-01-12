@@ -204,6 +204,14 @@ const AdminStore: NextPage = () => {
                     title={"Bairro"}
                   />
                   <TextInput<Inputs> name="address.state" title={"Estado"} />
+                  <TextInput<Inputs>
+                    name="address.longitude"
+                    title={"Longitude"}
+                  />
+                  <TextInput<Inputs>
+                    name="address.latitude"
+                    title={"Latitute"}
+                  />
                   <TextInput<Inputs> name="address.city" title={"Cidade"} />
                 </div>
               </div>

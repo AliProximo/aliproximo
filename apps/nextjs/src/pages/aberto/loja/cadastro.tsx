@@ -335,6 +335,42 @@ const ProtectedCreateStore: NextPage = () => {
               </div>
               <div className="w-full max-w-xs md:max-w-md">
                 <label className="label">
+                  <span className="label-text">Longitude</span>
+                </label>
+                <input
+                  type="text"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.longitude ? "input-error" : "border-black"
+                  }`}
+                  // aria-invalid={errors.address?.longitude ? "true" : "false"}
+                  // {...register("address.longitude")}
+                />
+                {errors.address?.city && (
+                  <label className="label">
+                    <span className="label-text-alt"></span>
+                  </label>
+                )}
+              </div>
+              <div className="w-full max-w-xs md:max-w-md">
+                <label className="label">
+                  <span className="label-text">Latitude</span>
+                </label>
+                <input
+                  type="text"
+                  className={`input-bordered input input-md w-full max-w-xs md:max-w-md ${
+                    errors.address?.latitude ? "input-error" : "border-black"
+                  }`}
+                  // aria-invalid={errors.address?.latitude ? "true" : "false"}
+                  // {...register("address.latitude")}
+                />
+                {errors.address?.city && (
+                  <label className="label">
+                    <span className="label-text-alt"></span>
+                  </label>
+                )}
+              </div>
+              <div className="w-full max-w-xs md:max-w-md">
+                <label className="label">
                   <span className="label-text">Cidade</span>
                 </label>
                 <input
