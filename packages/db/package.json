@@ -18,5 +18,8 @@
     "dev": "pnpm with-env prisma studio --port 5556",
     "with-env": "dotenv -e ../../.env --"
   },
-  "types": "./index.ts"
+  "types": "./index.ts",
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
+  }
 }
