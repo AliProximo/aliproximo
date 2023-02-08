@@ -11,6 +11,9 @@
     "typescript": "4.9.4"
   },
   "main": "./index.ts",
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "db:generate": "pnpm with-env prisma generate",
@@ -18,8 +21,5 @@
     "dev": "pnpm with-env prisma studio --port 5556",
     "with-env": "dotenv -e ../../.env --"
   },
-  "types": "./index.ts",
-  "prisma": {
-    "seed": "node prisma/seed.mjs"
-  }
+  "types": "./index.ts"
 }
