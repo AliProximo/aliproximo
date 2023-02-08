@@ -16,7 +16,9 @@ import { storeInputValidators } from "../validators/input/store";
 const storeProcedure = createRbacProcedure({
   requiredRoles: ["Admin", "Manager"],
 });
-const adminProcedure = createRbacProcedure({ requiredRoles: ["Admin"] });
+const adminProcedure = createRbacProcedure({
+  requiredRoles: ["Admin"],
+});
 
 const isAdmin = (user?: { email?: string | null; role: Role }) =>
   user?.email === env.ADMIN_EMAIL || user?.role === "Admin";
@@ -28,6 +30,7 @@ export const storeRouter = router({
         ? { verified: { equals: true } }
         : undefined,
       include: { logo: true },
+      orderBy: { postalCode: "asc" },
     });
   }),
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
@@ -60,40 +63,59 @@ export const storeRouter = router({
         if ((["Admin", "Manager"] as Role[]).includes(user.role)) return true;
         return false;
       })();
+      const calculateLatitudeAndLongitude = () => {
+        return {
+          latitude: -15.7901772,
+          longitude: -47.9355249,
+        };
+      };
 
       const { address, logoFilename, owner, ...rest } = input;
-      return ctx.prisma.store.create({
-        data: {
-          ...rest,
-          users: {
-            connect: {
-              id: user.id,
-            },
-          },
-          logo: {
-            create: {
-              name: logoFilename,
-              url: formatAWSfileUrl(logoFilename),
-            },
-          },
-          owner: {
-            connectOrCreate: {
-              where: { email: owner.email },
-              create: owner,
-            },
-          },
-          address: {
-            connectOrCreate: {
-              where: {
-                postalCode: address.postalCode,
+      return ctx.prisma.store
+        .create({
+          data: {
+            ...rest,
+            users: {
+              connect: {
+                id: user.id,
               },
-              create: address,
             },
+            logo: {
+              create: {
+                name: logoFilename,
+                url: formatAWSfileUrl(logoFilename),
+              },
+            },
+            owner: {
+              connectOrCreate: {
+                where: { email: owner.email },
+                create: owner,
+              },
+            },
+            address: {
+              connectOrCreate: {
+                where: {
+                  postalCode: address.postalCode,
+                },
+                create: address,
+              },
+            },
+            verified: isTrustedSource,
           },
-          verified: isTrustedSource,
-        },
-      });
+          // });
+        })
+        .then(() => {
+          // eslint-disable-next-line
+          console.log("deu certo");
+          const { latitude, longitude } = calculateLatitudeAndLongitude();
+          return ctx.prisma.$executeRaw` UPDATE Address SET 
+        latitude = ${latitude},
+        longitude = ${longitude},
+        location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
+        WHERE postalCode = ${address.postalCode}`;
+        });
     }),
+
   update: storeProcedure
     .input(storeInputValidators["update"])
     .mutation(async ({ ctx, input }) => {
@@ -147,43 +169,50 @@ export const storeRouter = router({
         key: store.logo.name,
       })
         .then(() =>
-          ctx.prisma.store.update({
-            where: { id },
-            data: {
-              ...rest,
-              logo: logoFilename
-                ? {
-                    create: {
-                      name: logoFilename,
-                      url: formatAWSfileUrl(logoFilename),
-                    },
-                  }
-                : undefined,
-              owner: owner
-                ? {
-                    connectOrCreate: {
-                      where: { email: owner.email },
-                      create: owner,
-                    },
-                  }
-                : undefined,
-              address: address
-                ? {
-                    connectOrCreate: {
-                      where: {
-                        postalCode: address.postalCode,
+          ctx.prisma.store
+            .update({
+              where: { id },
+              data: {
+                ...rest,
+                logo: logoFilename
+                  ? {
+                      create: {
+                        name: logoFilename,
+                        url: formatAWSfileUrl(logoFilename),
                       },
-                      create: address,
-                    },
-                  }
-                : undefined,
-            },
-            include: {
-              logo: true,
-              address: true,
-              owner: true,
-            },
-          }),
+                    }
+                  : undefined,
+                owner: owner
+                  ? {
+                      connectOrCreate: {
+                        where: { email: owner.email },
+                        create: owner,
+                      },
+                    }
+                  : undefined,
+                address: address
+                  ? {
+                      connectOrCreate: {
+                        where: {
+                          postalCode: address.postalCode,
+                        },
+                        create: address,
+                      },
+                    }
+                  : undefined,
+              },
+              include: {
+                logo: true,
+                address: true,
+                owner: true,
+              },
+            })
+            .then(() => {
+              return ctx.prisma
+                .$executeRaw`UPDATE Address SET latitude = ${address?.latitude}, longitude = ${address?.longitude},
+                location = ST_GeomFromText(CONCAT('POINT(', ${address?.latitude}, ' ', ${address?.longitude}, ')'))
+                WHERE postalCode = ${address?.postalCode}`;
+            }),
         )
         .catch((error) => {
           throw new TRPCError({
