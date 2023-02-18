@@ -29,8 +29,9 @@ export const create = z.object({
     neighborhood: z.string().min(1, { message: "Não pode ser vazio" }),
     street: z.string().optional(),
     country: z.string().optional(),
-    latitude: z.number().optional(),
-    longitude: z.number().optional(),
+    // TODO: remove default values when client code update
+    latitude: z.number().default(-15.7901772), //.optional(),
+    longitude: z.number().default(-47.9355249), //.optional(),
     location: z.number().optional(),
   }),
   logoFilename: z.string(),

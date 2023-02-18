@@ -63,15 +63,11 @@ export const storeRouter = router({
         if ((["Admin", "Manager"] as Role[]).includes(user.role)) return true;
         return false;
       })();
-      const calculateLatitudeAndLongitude = () => {
-        return {
-          latitude: -15.7901772,
-          longitude: -47.9355249,
-        };
-      };
 
-      const { address, logoFilename, owner, ...rest } = input;
-      return ctx.prisma.store
+      const { address: addressWithGPS, logoFilename, owner, ...rest } = input;
+      const { latitude, longitude, location: _location, ...address } = addressWithGPS;
+
+      const createdStore = await ctx.prisma.store
         .create({
           data: {
             ...rest,
@@ -102,20 +98,24 @@ export const storeRouter = router({
             },
             verified: isTrustedSource,
           },
-          // });
-        })
-        .then(() => {
-          // eslint-disable-next-line
-          console.log("deu certo");
-          const { latitude, longitude } = calculateLatitudeAndLongitude();
-          return ctx.prisma.$executeRaw` UPDATE Address SET 
+        });
+
+    const gpsUpdate: number = await ctx.prisma.$executeRaw` UPDATE Address SET 
         latitude = ${latitude},
         longitude = ${longitude},
         location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
         WHERE postalCode = ${address.postalCode}`;
-        });
-    }),
 
+    if (gpsUpdate === 0) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: 'falha ao atualizar latitude e longitude do endereço' });
+    } 
+ 
+    return ctx.prisma.store.findUniqueOrThrow({
+      where: {
+        id: createdStore.id
+      }
+    });
+  }),
   update: storeProcedure
     .input(storeInputValidators["update"])
     .mutation(async ({ ctx, input }) => {
@@ -162,7 +162,8 @@ export const storeRouter = router({
         return ctx.s3Client.send(command);
       }
 
-      const { id, address, logoFilename, owner, ...rest } = input;
+      const { id, address: addressWithGPS, logoFilename, owner, ...rest } = input;
+      const { latitude, longitude, location: _location, ...address } = addressWithGPS;
 
       return getDeletePromise({
         photo: logoFilename,
@@ -209,9 +210,12 @@ export const storeRouter = router({
             })
             .then(() => {
               return ctx.prisma
-                .$executeRaw`UPDATE Address SET latitude = ${address?.latitude}, longitude = ${address?.longitude},
-                location = ST_GeomFromText(CONCAT('POINT(', ${address?.latitude}, ' ', ${address?.longitude}, ')'))
-                WHERE postalCode = ${address?.postalCode}`;
+                .$executeRaw`UPDATE Address SET latitude = ${latitude}, longitude = ${longitude},
+                location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
+                WHERE postalCode = ${address.postalCode}`;
+            })
+            .then(() => { 
+              return ctx.prisma.store.findUniqueOrThrow({where: { id }})
             }),
         )
         .catch((error) => {
