@@ -23,6 +23,8 @@ export const clothingRouter = router({
         sizes: z.nativeEnum(SizeOptions).array().optional(),
         take: z.number().gte(0).optional(),
         skip: z.number().gte(0).optional(),
+        latitude: z.number().default(-15.7530834),
+        longitude: z.number().default(-47.9352765),
         orderBy: z
           .object({
             price: z.enum(["asc", "desc"]),
@@ -30,8 +32,8 @@ export const clothingRouter = router({
           .optional(),
       }),
     )
-    .query(({ ctx, input }) => {
-      return ctx.prisma.clothing.findMany({
+    .query(async ({ ctx, input }) => {
+      const clothingItems = await ctx.prisma.clothing.findMany({
         where:
           input.name || input.categoryId || input.storeId || input.sizes
             ? {
@@ -67,6 +69,17 @@ export const clothingRouter = router({
               photo: true,
             },
           },
+          store: {
+            select: {
+              postalCode: true,
+              address: {
+                select: {
+                  latitude: true,
+                  longitude: true,
+                },
+              },
+            },
+          },
         },
         take: input.take,
         skip: input.skip,
@@ -76,6 +89,42 @@ export const clothingRouter = router({
             }
           : undefined,
       });
+
+      const distanceQuery = await ctx.prisma.$queryRaw<{
+        id: string;
+        distance: number;
+        find: any;
+      }>`
+  SELECT
+	latitude,
+	longitude,
+  ST_Distance_sphere(POINT(latitude, longitude), POINT(${input.latitude}, ${input.longitude})) / 1000 as distance
+  FROM
+     Address,
+    Store as store
+  WHERE
+    store.postalCode = Address.postalCode AND
+    longitude >= -180 AND longitude <= 180 AND
+    ST_Distance_sphere(POINT(latitude, longitude), POINT(${input.latitude}, ${input.longitude})) <= 5000  
+    ORDER BY distance
+      `;
+
+      const itemsWithDistance = clothingItems.map((item) => {
+        const storeId = item.store?.storeId;
+        const storeDistance = distanceQuery.find(
+          (row: { id: string }) => row.id === storeId,
+        )?.distance;
+
+        return {
+          ...item,
+          store: {
+            ...item.store,
+            distance: storeDistance,
+          },
+        };
+      });
+
+      return itemsWithDistance;
     }),
   byId: publicProcedure
     .input(

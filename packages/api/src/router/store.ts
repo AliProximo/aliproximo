@@ -16,7 +16,9 @@ import { storeInputValidators } from "../validators/input/store";
 const storeProcedure = createRbacProcedure({
   requiredRoles: ["Admin", "Manager"],
 });
-const adminProcedure = createRbacProcedure({ requiredRoles: ["Admin"] });
+const adminProcedure = createRbacProcedure({
+  requiredRoles: ["Admin"],
+});
 
 const isAdmin = (user?: { email?: string | null; role: Role }) =>
   user?.email === env.ADMIN_EMAIL || user?.role === "Admin";
@@ -28,6 +30,7 @@ export const storeRouter = router({
         ? { verified: { equals: true } }
         : undefined,
       include: { logo: true },
+      orderBy: { postalCode: "asc" },
     });
   }),
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
@@ -61,8 +64,15 @@ export const storeRouter = router({
         return false;
       })();
 
-      const { address, logoFilename, owner, ...rest } = input;
-      return ctx.prisma.store.create({
+      const { address: addressWithGPS, logoFilename, owner, ...rest } = input;
+      const {
+        latitude,
+        longitude,
+        location: _location,
+        ...address
+      } = addressWithGPS;
+
+      const createdStore = await ctx.prisma.store.create({
         data: {
           ...rest,
           users: {
@@ -91,6 +101,26 @@ export const storeRouter = router({
             },
           },
           verified: isTrustedSource,
+        },
+      });
+
+      const gpsUpdate: number = await ctx.prisma
+        .$executeRaw` UPDATE Address SET 
+        latitude = ${latitude},
+        longitude = ${longitude},
+        location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
+        WHERE postalCode = ${address.postalCode}`;
+
+      if (gpsUpdate === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "falha ao atualizar latitude e longitude do endereço",
+        });
+      }
+
+      return ctx.prisma.store.findUniqueOrThrow({
+        where: {
+          id: createdStore.id,
         },
       });
     }),
@@ -140,50 +170,72 @@ export const storeRouter = router({
         return ctx.s3Client.send(command);
       }
 
-      const { id, address, logoFilename, owner, ...rest } = input;
+      const {
+        id,
+        address: addressWithGPS,
+        logoFilename,
+        owner,
+        ...rest
+      } = input;
+      const {
+        latitude,
+        longitude,
+        location: _location,
+        ...address
+      } = addressWithGPS;
 
       return getDeletePromise({
         photo: logoFilename,
         key: store.logo.name,
       })
         .then(() =>
-          ctx.prisma.store.update({
-            where: { id },
-            data: {
-              ...rest,
-              logo: logoFilename
-                ? {
-                    create: {
-                      name: logoFilename,
-                      url: formatAWSfileUrl(logoFilename),
-                    },
-                  }
-                : undefined,
-              owner: owner
-                ? {
-                    connectOrCreate: {
-                      where: { email: owner.email },
-                      create: owner,
-                    },
-                  }
-                : undefined,
-              address: address
-                ? {
-                    connectOrCreate: {
-                      where: {
-                        postalCode: address.postalCode,
+          ctx.prisma.store
+            .update({
+              where: { id },
+              data: {
+                ...rest,
+                logo: logoFilename
+                  ? {
+                      create: {
+                        name: logoFilename,
+                        url: formatAWSfileUrl(logoFilename),
                       },
-                      create: address,
-                    },
-                  }
-                : undefined,
-            },
-            include: {
-              logo: true,
-              address: true,
-              owner: true,
-            },
-          }),
+                    }
+                  : undefined,
+                owner: owner
+                  ? {
+                      connectOrCreate: {
+                        where: { email: owner.email },
+                        create: owner,
+                      },
+                    }
+                  : undefined,
+                address: address
+                  ? {
+                      connectOrCreate: {
+                        where: {
+                          postalCode: address.postalCode,
+                        },
+                        create: address,
+                      },
+                    }
+                  : undefined,
+              },
+              include: {
+                logo: true,
+                address: true,
+                owner: true,
+              },
+            })
+            .then(() => {
+              return ctx.prisma
+                .$executeRaw`UPDATE Address SET latitude = ${latitude}, longitude = ${longitude},
+                location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
+                WHERE postalCode = ${address.postalCode}`;
+            })
+            .then(() => {
+              return ctx.prisma.store.findUniqueOrThrow({ where: { id } });
+            }),
         )
         .catch((error) => {
           throw new TRPCError({
