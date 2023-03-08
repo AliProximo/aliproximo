@@ -65,57 +65,65 @@ export const storeRouter = router({
       })();
 
       const { address: addressWithGPS, logoFilename, owner, ...rest } = input;
-      const { latitude, longitude, location: _location, ...address } = addressWithGPS;
+      const {
+        latitude,
+        longitude,
+        location: _location,
+        ...address
+      } = addressWithGPS;
 
-      const createdStore = await ctx.prisma.store
-        .create({
-          data: {
-            ...rest,
-            users: {
-              connect: {
-                id: user.id,
-              },
+      const createdStore = await ctx.prisma.store.create({
+        data: {
+          ...rest,
+          users: {
+            connect: {
+              id: user.id,
             },
-            logo: {
-              create: {
-                name: logoFilename,
-                url: formatAWSfileUrl(logoFilename),
-              },
-            },
-            owner: {
-              connectOrCreate: {
-                where: { email: owner.email },
-                create: owner,
-              },
-            },
-            address: {
-              connectOrCreate: {
-                where: {
-                  postalCode: address.postalCode,
-                },
-                create: address,
-              },
-            },
-            verified: isTrustedSource,
           },
-        });
+          logo: {
+            create: {
+              name: logoFilename,
+              url: formatAWSfileUrl(logoFilename),
+            },
+          },
+          owner: {
+            connectOrCreate: {
+              where: { email: owner.email },
+              create: owner,
+            },
+          },
+          address: {
+            connectOrCreate: {
+              where: {
+                postalCode: address.postalCode,
+              },
+              create: address,
+            },
+          },
+          verified: isTrustedSource,
+        },
+      });
 
-    const gpsUpdate: number = await ctx.prisma.$executeRaw` UPDATE Address SET 
+      const gpsUpdate: number = await ctx.prisma
+        .$executeRaw` UPDATE Address SET 
         latitude = ${latitude},
         longitude = ${longitude},
         location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
         WHERE postalCode = ${address.postalCode}`;
 
-    if (gpsUpdate === 0) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: 'falha ao atualizar latitude e longitude do endereço' });
-    } 
- 
-    return ctx.prisma.store.findUniqueOrThrow({
-      where: {
-        id: createdStore.id
+      if (gpsUpdate === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "falha ao atualizar latitude e longitude do endereço",
+        });
       }
-    });
-  }),
+
+      return ctx.prisma.store.findUniqueOrThrow({
+        where: {
+          id: createdStore.id,
+        },
+      });
+    }),
   update: storeProcedure
     .input(storeInputValidators["update"])
     .mutation(async ({ ctx, input }) => {
@@ -162,8 +170,19 @@ export const storeRouter = router({
         return ctx.s3Client.send(command);
       }
 
-      const { id, address: addressWithGPS, logoFilename, owner, ...rest } = input;
-      const { latitude, longitude, location: _location, ...address } = addressWithGPS;
+      const {
+        id,
+        address: addressWithGPS,
+        logoFilename,
+        owner,
+        ...rest
+      } = input;
+      const {
+        latitude,
+        longitude,
+        location: _location,
+        ...address
+      } = addressWithGPS;
 
       return getDeletePromise({
         photo: logoFilename,
@@ -214,8 +233,8 @@ export const storeRouter = router({
                 location = ST_GeomFromText(CONCAT('POINT(', ${latitude}, ' ', ${longitude}, ')'))
                 WHERE postalCode = ${address.postalCode}`;
             })
-            .then(() => { 
-              return ctx.prisma.store.findUniqueOrThrow({where: { id }})
+            .then(() => {
+              return ctx.prisma.store.findUniqueOrThrow({ where: { id } });
             }),
         )
         .catch((error) => {

@@ -8,6 +8,7 @@ export const update = z.object({
   sizes: z.nativeEnum(SizeOptions).array().optional(),
   // product data
   name: z.string().optional(),
+  location: z.number().optional(),
   quantity: z.number().int().gte(0).optional(),
   description: z.string().optional(),
   price: z
