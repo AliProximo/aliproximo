@@ -11,9 +11,11 @@ const AdminProducts: NextPage = () => {
   const router = useRouter();
   const { data: sessionData } = useSession();
   const [name, setName] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useState<string | undefined>(undefined);
   const { data: allClothings, refetch } = trpc.clothing.all.useQuery(
     {
       storeId: sessionData?.user.storeId,
+      name: search,
     },
     {
       enabled: !!sessionData?.user,
@@ -79,7 +81,10 @@ const AdminProducts: NextPage = () => {
                 type="text"
                 value={name ?? ""}
                 className="input input-md w-full max-w-xs md:max-w-md lg:max-w-xl"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setSearch(e.target.value);
+                }}
               />
             </div>
             <input
